@@ -1,7 +1,7 @@
 # PERIMETER — Document Fondateur
 
 *Projet personnel de Martin Pavloff — hors Tranquility Suite*
-*Version 1.2 — 24 août 2026*
+*Version 1.3 — 24 août 2026*
 
 ---
 
@@ -39,7 +39,10 @@ Critère de sélection : la douleur ressentie prime sur la facilité technique.
 - **Calendrier & temps** — charge de la journée, présentiel/télétravail
 - **Pilotage de projets** — Monday, chantiers en retard, statuts
 - **Carrière & opportunités** — offres d'emploi, candidatures
-- **Management d'équipe** — 1-to-1, charge des collaborateurs
+- **Management d'équipe** — 1-to-1, charge des collaborateurs. Azimut hybride (D27, D28) :
+  - *Automatique V1* : 1-to-1 en retard (calendrier, motif `Point Hebdo [Nom] x Martin`, seuil 10 jours sans occurrence) ; charge en retard/bloquée par collaborateur (Monday)
+  - *Manuel V1* : tension à adresser, feedback en attente, autre (note libre) — champs non automatisables
+  - *Automatique V2* : signal mail via lecture Ollama du contenu (pas un simple mot-clé), scope étroit à cet azimut, indépendant de la construction complète de l'azimut Boîte mail (toujours reporté)
 
 ### Azimuts reportés — côté pro
 
@@ -143,7 +146,32 @@ Poids contextuel = Poids journée × Poids période
 
 **Décision actée : le cercle EST l'écran d'accueil.** Pas un dashboard classique en premier plan — un visuel circulaire central qui représente la charge en temps réel, azimut par azimut. Le détail (brief textuel, propositions) s'ouvre au clic sur un point du cercle.
 
-*(Le design précis du cercle — couleurs, animation d'amincissement, disposition des azimuts — reste à travailler lors d'une session dédiée avec le skill de design frontend.)*
+### Direction visuelle (D24) — papier & encre
+
+- **Palette** : papier crème `#F1ECDF`, encre quasi noire `#1E1B15`, encre pâle `#A79E8C` (résolu/discret), hairline `#C7BDA6`, rouge de rubrication `#A13A22` (accent rare, réservé au dépassement de seuil) — contraste fort, volontairement éloigné du dark theme NASA/Apollo de la Tranquility Suite (identité distincte assumée)
+- **Typographie** : sans-serif uniquement, aucune italique — **IBM Plex Sans** pour tous les textes, **IBM Plex Mono** pour les données chiffrées (points, pourcentages, dates courtes)
+- **Le cercle** : un anneau continu (pas des arcs séparés), tracé à main levée (léger tremblé via déformation SVG). Le bord extérieur reste stable ; le bord intérieur se rapproche du centre selon la charge, avec transition fluide entre azimuts — pas de cassures nettes
+- **Épaisseur plafonnée** : le trait varie entre une épaisseur minimale (calme) et une épaisseur maximale fixe — jamais de débordement visuel, quelle que soit la charge réelle sous-jacente (voir section 5bis, normalisation)
+- **Labels en retrait** : les noms d'azimuts ne touchent jamais le cercle — reliés par une fine ligne de rappel (point sur le tracé → coude → texte), inspiré des annotations techniques (recherche NASA de la Tranquility Suite)
+- **Fanion "seuil"** : petit marqueur rouge de rubrication sur l'azimut qui dépasse son seuil, écho réduit du bandeau "CAUTION" exploré pour Tranquility
+
+### Parcours en 4 séquences (D25)
+
+Un stepper à 4 points matérialise l'avancement :
+
+1. **Ouverture / lancement** — cercle neutre (charge non affichée), bouton "Lancer le tour"
+2. **Tracé avec charge réelle** — le cercle tel que décrit ci-dessus, azimut par azimut
+3. **Compte-rendu + plan d'action** — le cercle se réduit en médaillon, liste d'actions triée par charge décroissante, barre de progression globale
+4. **Fin de tâche — avant/après** — deux tracés (avant estompé, après net) avec le delta chiffré par azimut, preuve visuelle que le tour a allégé la charge
+
+Prototype de référence : `perimeter_parcours_prototype_v3.html` (à verser dans `design/` du repo).
+
+### 5bis. Normalisation de l'affichage (D26)
+
+- **Unités atomiques d'un point** : urgence (échelle 1 à 5), ancienneté (en semaines depuis l'ouverture)
+- **Séparation stricte** : la charge brute réelle n'est jamais plafonnée (cohérent avec D14) — seul l'affichage sature. La valeur stockée dans Supabase sert de référence pour les comparaisons avant/après (séquence 4) et la détection de seuil, jamais la version affichée
+- **Courbe de normalisation** : `affichage = charge / (charge + k)` — jamais de plafond artificiel, l'asymptote fait le travail. `k` par azimut dérivé du seuil déjà acté (D15) avec urgence médiane (3) et ancienneté médiane (2 semaines) comme référence : Calendrier & temps k=18, Pilotage de projets k=36, Carrière & opportunités k=12, Management d'équipe k=12
+- **Charge totale centrale** : moyenne des 4 fractions normalisées × 100 (lecture "48" = "48% de charge globale")
 
 ---
 
@@ -218,16 +246,19 @@ Suite à un retour détaillé de ChatGPT sur le module carrière (comparaison av
 - **D21** — Hébergement définitif : n8n sur Oracle Cloud Free Tier ; Supabase en Cloud managé (pas self-hosted) pour la mémoire/stockage ; Ollama reste en local
 - **D22** — Modèle IA définitif : Mistral 7B, confirmé pour le Mac Maison (16 Go)
 - **D23** — LinkedIn : la brique CAPTURE (bookmarklet "Envoyer à Perimeter", résumé/catégorisation manuelle) est retenue pour l'activation de l'azimut Visibilité & réseaux (V1 ou V2) ; les briques RADAR (veille automatisée multi-sources) et INTELLIGENCE (croisement de signaux, détection de tendances) sont reportées en V3, en cohérence avec le chantier "capital professionnel" déjà prévu.
+- **D24** — Direction visuelle actée : papier & encre, sans-serif uniquement (IBM Plex Sans + Mono), cercle continu à bord intérieur variable, épaisseur de trait plafonnée, labels en retrait reliés par lignes de rappel, identité distincte du dark theme NASA/Apollo de la Tranquility Suite
+- **D25** — Parcours en 4 séquences acté : Ouverture/lancement → Tracé → Compte-rendu + plan d'action hiérarchisé → Fin de tâche (avant/après), matérialisé par un stepper à 4 points
+- **D26** — Échelle de normalisation actée : urgence 1-5, ancienneté en semaines, courbe saturante `charge/(charge+k)` par azimut (k dérivé des seuils D15), charge réelle jamais plafonnée, seul l'affichage sature ; charge totale centrale = moyenne des fractions normalisées × 100
+- **D27** — Azimut Management d'équipe, structure V1 hybride : automatique (1-to-1 en retard via motif calendrier `Point Hebdo [Nom] x Martin`, seuil 10 jours ; charge Monday en retard/bloquée par collaborateur), manuel (tension à adresser, feedback en attente, autre)
+- **D28** — Signal mail sur Management d'équipe reporté en V2, lecture Ollama du contenu (pas un mot-clé), scope étroit à cet azimut, indépendant de la construction complète de l'azimut Boîte mail (toujours reporté)
 
 ---
 
 ## 11. Ce qui reste à trancher
 
-- Échelle de normalisation pour l'affichage visuel du cercle (probablement logarithmique)
-- Design visuel précis du cercle (skill frontend-design à mobiliser)
-- Solution retenue pour le blocage LinkedIn (lecture manuelle assistée ?)
-- Détail de la saisie manuelle pour Management d'équipe (format, fréquence)
 - Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
+- Première implémentation : schéma Supabase, premiers workflows n8n, premier azimut construit de bout en bout
+- Fichier `PERIMETER_VEILLE_OPENSOURCE.md` à reconstituer (perdu lors du passage en ressources projet, non retrouvé dans les recherches du 24 août)
 
 ---
 
