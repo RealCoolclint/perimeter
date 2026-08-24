@@ -35,3 +35,15 @@ git mv PERIMETER_DOCUMENT_FONDATEUR_V[ANCIEN].md PERIMETER_DOCUMENT_FONDATEUR_V[
 ---
 
 *Protocole permanent — Perimeter · 24 août 2026*
+
+
+## Mise à jour — 24 août 2026, session ultérieure
+
+Le repo est passé en **public** pour garantir l'accès direct de JARVIS via bash_tool
+(clone Git standard, sans authentification). Le protocole devient automatique :
+JARVIS exécute lui-même pull + identification + lecture en une seule séquence bash,
+sans relais manuel de Martin.
+
+**Condition de réversibilité actée avec Martin** : dès que Perimeter contient de la
+donnée réelle sensible (tensions d'équipe nominatives, candidatures en cours, contenu
+Supabase réel), la question du retour en privé doit être reposée.
