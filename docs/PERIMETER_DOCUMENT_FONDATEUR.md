@@ -1,0 +1,234 @@
+# PERIMETER — Document Fondateur
+
+*Projet personnel de Martin Pavloff — hors Tranquility Suite*
+*Version 1.2 — 24 août 2026*
+
+---
+
+## 1. Le concept fondateur
+
+Perimeter part d'une image simple et puissante :
+
+> **Un cercle. Martin au centre, le trait fin.**
+> Chaque azimut du cercle représente une catégorie de préoccupation personnelle ou professionnelle. Sur chaque azimut se déposent des points — des problèmes concrets, non résolus.
+>
+> Plus ces points sont nombreux et anciens, plus le trait du cercle **s'épaissit et se rapproche du centre** : c'est la représentation visuelle de la charge, de la pression ressentie.
+>
+> Perimeter **parcourt le cercle**, azimut par azimut, adresse ce qui peut l'être, propose des actions pour le reste. Chaque tour qui résout des points **amincit le trait** — et donc allège la charge perçue.
+
+Ce principe unique organise toutes les fonctionnalités de l'app : elles existent pour réduire l'épaisseur du cercle, pas pour empiler de l'information.
+
+**D8 — Référence de concept.** Le mécanisme de Perimeter s'inspire du modèle CleanMyMac : indicateurs continus (épaisseur du cercle) + protocole de scan à la demande (le Tour) + actions proposées, jamais automatiques.
+
+---
+
+## 2. Vision produit en une phrase
+
+Perimeter fait le tour des préoccupations quotidiennes et générales de Martin, et propose des solutions adaptées et intelligentes — dans le but constant d'alléger la charge mentale ressentie.
+
+---
+
+## 3. Les azimuts
+
+**Périmètre du projet (D11) : pro + perso.** Perimeter couvre toute la vie de Martin, pas seulement le travail. Règle de sélection transverse : pas de saisie manuelle pure côté perso — un azimut n'est retenu que s'il dispose d'une source automatique fiable.
+
+### Azimuts V1 (D10)
+
+Critère de sélection : la douleur ressentie prime sur la facilité technique.
+
+- **Calendrier & temps** — charge de la journée, présentiel/télétravail
+- **Pilotage de projets** — Monday, chantiers en retard, statuts
+- **Carrière & opportunités** — offres d'emploi, candidatures
+- **Management d'équipe** — 1-to-1, charge des collaborateurs
+
+### Azimuts reportés — côté pro
+
+- Boîte mail (tri, relances, résumés, deadlines cachées)
+- Veille sectorielle (presse vidéo / médias digitaux / IA)
+- Visibilité & réseaux (audience Insta/TikTok/YouTube, LinkedIn)
+- Administratif & budget (échéances, notes de frais)
+- Énergie & charge mentale (surcharge de réunions, pauses)
+- Mémoire & connaissance (journal de décisions, base de contacts)
+
+### Azimuts reportés — côté perso (D11)
+
+- **Santé** — source auto disponible via Calendrier
+- **Famille & proches** — source auto disponible via Calendrier
+
+### Azimuts explorés et non retenus (D11)
+
+Loisirs, Finances perso, Domicile — écartés faute de source automatique fiable, pas de saisie manuelle pure côté perso.
+
+---
+
+## 4. Le principe de fonctionnement — Le Tour
+
+- **Déclenchement** : à chaque ouverture de session, sur n'importe quel Mac (Maison / Bureau / Studio) — pas de veille permanente en tâche de fond, pas de Mac à laisser allumé.
+- **Mémoire du tour** : chaque passage se souvient du précédent (stocké dans Supabase) — quand il a eu lieu, ce qui a été montré, ce qui est resté sans réponse.
+- **Profondeur adaptative** : le 1er tour de la journée regarde loin (nuit + journée à venir). Les tours suivants ne regardent que le delta depuis le dernier passage, et vérifient en priorité si les propositions précédentes ont été traitées.
+
+### Mécanique en 3 phases (D12)
+
+1. **Tour de check** — collecte du delta depuis le dernier passage.
+2. **Constat de la charge** — tous les azimuts passés en revue un par un, sans résoudre, pour construire un plan d'action priorisé.
+3. **Tour de résolution** — exécution du plan, propositions d'action, validation de Martin.
+
+**Objectif de chaque tour** : faire baisser la charge (épaisseur du cercle) en résolvant ou en proposant une action sur chaque point identifié.
+
+---
+
+## 5. Formule de calcul de la charge
+
+### Formule générale (D9)
+
+```
+Charge par azimut = (charge brute des points + bonus de seuil) × poids contextuel
+```
+
+- **Charge brute** = somme des scores `urgence × ancienneté` de chaque point de l'azimut
+- **Bonus de seuil** = déclenché si le volume de points dépasse un seuil propre à l'azimut
+- **Poids contextuel** = multiplicateur automatique (calendrier du jour + période), sans réglage manuel de Martin
+
+### Bonus de seuil — progressif, sans plafond (D14, D15)
+
+```
+Bonus de seuil = charge brute × 10% × (points ouverts − seuil), si points ouverts > seuil
+                = 0, sinon
+```
+
+Volontairement sans plafond : l'effet de débordement doit rester visible même en cas de surcharge extrême sur un azimut.
+
+**Seuils de volume par azimut (D15) :**
+
+| Azimut | Seuil |
+|---|---|
+| Calendrier & temps | 3 points ouverts simultanés |
+| Pilotage de projets (Monday) | 6 points ouverts |
+| Carrière & opportunités | 2 points ouverts |
+| Management d'équipe | 2 collaborateurs en attente |
+
+### Poids contextuel — deux composantes multipliées (D16 à D20)
+
+```
+Poids journée   = 1.0 + majoration réunions + majoration tournage/terrain
+Poids période   = 1.0 + majoration dates fixes + majoration dynamique (deadlines Monday)
+
+Poids contextuel = Poids journée × Poids période
+```
+
+**Composante journée (D16)** — signaux calendrier du jour :
+
+| Signal détecté | Majoration |
+|---|---|
+| Journée dense en réunions (>4h cumulées) | +0.2 |
+| Journée de tournage / terrain (déplacement) | +0.3 |
+| Journée calme / bureau | 0 (neutre) |
+
+**Composante période — détection combinée (D17)** : dates fixes connues + calcul dynamique depuis la densité des deadlines Monday. Cumulables si deux périodes se chevauchent (ex: rentrée + salons en septembre) — volontaire, ça reflète la vraie surcharge quand plusieurs pics se superposent.
+
+**Majorations "dates fixes" (D18) :**
+
+| Période | Fenêtre | Majoration |
+|---|---|---|
+| Rentrée de septembre | 1–30 sept | +0.3 |
+| Salons | 1er oct – 31 mars | +0.1 (fond, longue durée) |
+| Parcoursup (vœux + résultats) | Récupérée automatiquement chaque année (recherche/calendrier officiel — workflow n8n annuel à prévoir) | +0.3 |
+| BAC & Brevet (résultats) | Fin juin / début juillet | +0.3 |
+
+**Majoration "dynamique" (D19)** : +0.2 si plus de 3 échéances Monday dans les 7 jours à venir.
+
+---
+
+## 6. Interface
+
+**Décision actée : le cercle EST l'écran d'accueil.** Pas un dashboard classique en premier plan — un visuel circulaire central qui représente la charge en temps réel, azimut par azimut. Le détail (brief textuel, propositions) s'ouvre au clic sur un point du cercle.
+
+*(Le design précis du cercle — couleurs, animation d'amincissement, disposition des azimuts — reste à travailler lors d'une session dédiée avec le skill de design frontend.)*
+
+---
+
+## 7. Architecture technique validée
+
+| Couche | Choix | Pourquoi |
+|---|---|---|
+| **Orchestration (atelier)** | n8n auto-hébergé sur Oracle Cloud Free Tier (2 OCPU / 12 Go — allocation réduite depuis juin 2026) | Gratuit, n8n est léger et tient confortablement dans les nouvelles limites. Risque de coupure existant mais faible impact (rejouer un tour manuellement si besoin) — **D21** |
+| **Intelligence** | Ollama en local, sur le Mac utilisé au moment du tour — **Mistral 7B confirmé (D22)**, testé pour le Mac Maison (16 Go) | Zéro coût récurrent, données sensibles (mails) qui ne sortent pas de la machine ; 7B tient confortablement dans 16 Go avec marge pour le reste du système |
+| **Mémoire / stockage (archives)** | Supabase Cloud managé — pas de self-hosting (Postgres + pgvector inclus, free tier ~500 Mo) — **D21** | Plus fiable que du self-hosted sur Oracle pour la donnée la plus sensible (mémoire des tours) ; zéro serveur à administrer, mise en route plus rapide |
+| **Identification** | Coffre-fort chiffré n8n pour les clés API des services externes ; login simple pour Martin | Pas de clé en clair, cohérent avec les pratiques déjà validées sur RENDEZVOUS |
+| **Portabilité** | App installée localement sur chaque Mac, connectée en partie au cloud pour tout ce qui n'a pas besoin d'être local | Aucun Mac à privilégier ni à laisser allumé ; synchronisation à l'ouverture de session |
+
+**Point de vigilance Oracle (mis à jour août 2026) :** Oracle a réduit sans annonce publique l'allocation Always Free du compute ARM de 4 OCPU/24 Go à 2 OCPU/12 Go (effectif depuis le 15 juin 2026), avec suppression des ressources dépassant la nouvelle limite après le 18 août 2026. Le tier reste utilisable pour n8n (léger), mais n'est plus considéré comme un socle 100% stable — d'où la décision de sortir Supabase du même risque en le mettant en Cloud managé plutôt qu'auto-hébergé sur la même instance.
+
+**Point de veille n8n (pas une décision, une vigilance) :** n8n fonctionne sous Sustainable Use License — sans impact pour un usage strictement personnel, mais à réexaminer si Perimeter devait un jour être distribué à d'autres personnes.
+
+---
+
+## 8. Contraintes réelles identifiées par source (vérifiées août 2026)
+
+**Faciles, gratuites, officielles :**
+- Gmail, Google Calendar, YouTube Data/Analytics : API officielles gratuites
+- Monday : déjà intégré côté Tranquility, réutilisable
+- Instagram Graph API : gratuite, nécessite un compte Pro relié à une page Facebook
+
+**Faisables avec un peu de travail :**
+- Presse : pas de scan automatique magique — flux RSS ciblés, 100% gratuits
+- France Travail (ex Pôle Emploi) : API officielle et gratuite, 300 000+ offres structurées en temps réel
+
+**Point fort inattendu :**
+- Publier sur LinkedIn en son propre nom est gratuit et sans validation partenaire (scope `w_member_social`, self-service)
+
+**Vrai blocage :**
+- Lire automatiquement le fil LinkedIn (posts d'autres personnes) : aucune API officielle viable. Solution : lecture manuelle ou semi-automatique, pas une vraie veille automatisée.
+- TikTok : API business existante mais limitée aux statistiques d'audience, pas de veille de contenu.
+
+---
+
+## 9. Roadmap en itérations (D13)
+
+Suite à un retour détaillé de ChatGPT sur le module carrière (comparaison avec ApplyPass), triage effectué pour éviter la dérive de périmètre :
+
+- **V1 — Le socle** : le cercle, les 4 azimuts retenus, la formule de charge complète, le Tour en 3 phases, la Carrière avec ses sources simples.
+- **V2** : distinction Problèmes / Signaux / Actions, dimension "Opportunité" séparée de la "Charge" pour la Carrière, mémoire des refus/préférences, arbitrage sur l'ordre de construction (moteur du Tour avant finition visuelle du cercle).
+- **V3** : capital professionnel (graphe relationnel), profil vectoriel complet (embeddings CV/trajectoires), abstraction multi-LLM.
+
+---
+
+## 10. Historique des décisions actées
+
+- **D1** — Nom provisoire retenu : Perimeter
+- **D2** — Architecture hybride : collecte + mémoire dans le cloud (à la demande), intelligence en local
+- **D3** — Base de données : Supabase (Postgres + pgvector)
+- **D4** — Orchestration : n8n comme colonne vertébrale
+- **D5** — Déclenchement : à chaque ouverture de session, tour adaptatif selon la mémoire du tour précédent
+- **D6** — Concept fondateur : le cercle, la charge, les azimuts
+- **D7** — Interface : le cercle est l'écran d'accueil central, visuel
+- **D8** — Référence de concept : modèle CleanMyMac (indicateurs continus + scan à la demande + actions proposées)
+- **D9** — Formule de calcul de la charge : (charge brute + bonus de seuil) × poids contextuel automatique
+- **D10** — Azimuts V1 tranchés : Calendrier & temps, Pilotage de projets, Carrière & opportunités, Management d'équipe
+- **D11** — Périmètre élargi pro + perso : ajout Santé et Famille & proches (reportés) ; Loisirs/Finances/Domicile exclus faute de source automatique
+- **D12** — Mécanique du Tour précisée en 3 phases : check → constat de la charge → résolution
+- **D13** — Roadmap en itérations actée : V1 (socle) → V2 (Problèmes/Signaux/Actions, Opportunité, mémoire des refus) → V3 (capital professionnel, profil vectoriel, multi-LLM)
+- **D14** — Bonus de seuil progressif : +10% de la charge brute par point au-delà du seuil, sans plafond
+- **D15** — Seuils de volume par azimut : Calendrier & temps (3), Monday (6), Carrière (2), Management d'équipe (2)
+- **D16** — Poids contextuel, composante journée : +0.2 si journée dense en réunions, +0.3 si journée de tournage/terrain
+- **D17** — Poids contextuel, composante période : détection combinée (dates fixes + calcul dynamique deadlines Monday) ; Parcoursup récupéré automatiquement chaque année
+- **D18** — Majorations dates fixes actées : Rentrée sept +0.3, Salons oct-mars +0.1, Parcoursup +0.3, Bac/Brevet +0.3, cumulables si chevauchement
+- **D19** — Majoration dynamique : +0.2 si plus de 3 échéances Monday dans les 7 jours à venir
+- **D20** — Formule complète du poids contextuel actée : `Poids journée × Poids période`
+- **D21** — Hébergement définitif : n8n sur Oracle Cloud Free Tier ; Supabase en Cloud managé (pas self-hosted) pour la mémoire/stockage ; Ollama reste en local
+- **D22** — Modèle IA définitif : Mistral 7B, confirmé pour le Mac Maison (16 Go)
+- **D23** — LinkedIn : la brique CAPTURE (bookmarklet "Envoyer à Perimeter", résumé/catégorisation manuelle) est retenue pour l'activation de l'azimut Visibilité & réseaux (V1 ou V2) ; les briques RADAR (veille automatisée multi-sources) et INTELLIGENCE (croisement de signaux, détection de tendances) sont reportées en V3, en cohérence avec le chantier "capital professionnel" déjà prévu.
+
+---
+
+## 11. Ce qui reste à trancher
+
+- Échelle de normalisation pour l'affichage visuel du cercle (probablement logarithmique)
+- Design visuel précis du cercle (skill frontend-design à mobiliser)
+- Solution retenue pour le blocage LinkedIn (lecture manuelle assistée ?)
+- Détail de la saisie manuelle pour Management d'équipe (format, fréquence)
+- Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
+
+---
+
+*Document vivant — à mettre à jour à chaque session de travail sur Perimeter.*
