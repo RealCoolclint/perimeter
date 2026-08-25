@@ -1,7 +1,7 @@
 # PERIMETER — Document Fondateur
 
 *Projet personnel de Martin Pavloff — hors Tranquility Suite*
-*Version 1.5 — 25 août 2026*
+*Version 1.6 — 25 août 2026*
 
 ---
 
@@ -258,6 +258,8 @@ Suite à un retour détaillé de ChatGPT sur le module carrière (comparaison av
 - **D33** — Nouvel azimut/sous-fonctionnalité "Suivi Présentiel/TT" (Management d'équipe) : tableau vivant par personne, alimenté depuis Monday.com (board `5033664702`, rotation annuelle au 8 octobre — archives conservées). Deux types d'événements suivis : présentiel exceptionnel (tournage planifié un jour TT théorique) et TT exceptionnel (item "TT [Prénom]" sur une période présentielle). Aucun calcul de compensation ni de solde correctif — collecte factuelle et datée à visée d'argumentation (cf. note de service RH du 24/07/2026). Rythme fixe par personne à enregistrer en config datée (a déjà changé une fois, le 13/10/2025).
 - **D34** — Rythme fixe D33 confirmé et datée : un seul rythme, identique pour toute l'équipe suivie (Thomas Clicteur, Antoine Paley, Charlyne Féneant, Lisa Mazal, Maëlle Das Neves) — TT lundi/mardi/vendredi, présentiel mercredi/jeudi, en vigueur depuis le **13/10/2025**. Règle de désambiguïsation actée : "Antoine" seul dans un item Monday désigne toujours Antoine Paley (jamais Antoine Vassas, hors équipe directe). Périodes "école" des alternantes (Charlyne, Lisa, Maëlle) traitées comme hors-jeu — aucune détection TT/présentiel appliquée ces jours-là, pas de logique de priorité construite pour ce cas rare.
 - **D35** — Source de détection TT/RTT sur le board `5033664702` : colonnes `Période - Start` / `Période - End` (109 des 114 lignes `Statut Prod = Absence` renseignées), pas `Date de tournage`. Règle de classification : le mot "TT" doit être détecté comme token isolé, jamais comme sous-chaîne de "RTT" (piège identifié : "RTT" contient "TT"). Le filtre `Statut Prod = Absence` + `Période` non vide exclut naturellement les lignes mal taguées (vraies productions classées par erreur en Absence).
+- **D36** — Rythme antérieur au 13/10/2025 confirmé : présentiel mardi/mercredi (donc TT lundi/jeudi/vendredi), en vigueur depuis le **01/09/2024**. Le Code node de classification gère désormais deux périodes de rythme successives (la plus récente prioritaire), avant le 01/09/2024 aucun rythme n'est appliqué (donnée hors scope).
+- **D37** — Détection présentiel exceptionnel affinée après vérification croisée avec l'export Excel du board (recalcul indépendant, comparé ligne à ligne à la sortie n8n). Trois ajustements actés : (1) filtre sur la colonne `Pôles` — exclusion des tournages où la Cellule Vidéo n'intervient pas (StudyAdvisor, Solo Redac, Pôle ?) ; (2) `Responsable Backup` ajouté comme repli quand `Resp. Tournage` est vide, la personne de backup étant de facto sur le tournage ; (3) quand aucune personne du roster n'est identifiée, le jour est attribué par défaut à **Martin Pavloff** plutôt qu'ignoré, mais marqué comme non confirmé via une colonne booléenne dédiée `confirme` sur la table `presentiel_tt_evenements` — pour distinguer données vérifiées et estimations. Les estimations (`confirme = false`) ont vocation à être affinées ultérieurement par croisement avec mail, Teams et calendrier.
 
 ---
 
@@ -271,9 +273,11 @@ Ce qui n'est pas encore couvert par ce premier azimut : les "points" proprement 
 
 ### 10ter. État d'implémentation — Suivi Présentiel/TT (D33, 25 août 2026)
 
-Schéma Supabase créé et versionné (`supabase/migrations/20260825000001_presentiel_tt_schema.sql`) : tables `rythme_config` (config datée, ligne 13/10/2025 insérée) et `presentiel_tt_evenements` (contrainte unique personne+date+type, RLS service_role). Règles de détection actées (D34, D35).
+Pipeline complet et validé de bout en bout : API Monday.com en GraphQL direct avec pagination par curseur (le node natif "Get Many Items" plafonnait silencieusement à 240 items sur les 814 du board, sans erreur — contournement nécessaire) → Code node de classification (deux rythmes D34/D36, filtre Pôles D37, repli Resp. Tournage → Responsable Backup → attribution par défaut D37) → Supabase (`presentiel_tt_evenements`).
 
-Ce qui manque encore : le node n8n Monday.com sur le board `5033664702` (bloqué — n8n Docker local n'existe que sur le Mac Maison, voir Point de vigilance section 7) ; le Code node de classification (TT isolé vs RTT, croisement présentiel exceptionnel) ; l'écriture effective des événements dans `presentiel_tt_evenements`.
+Résultat vérifié par recalcul indépendant depuis l'export Excel du board (pas seulement testé — confronté ligne à ligne à une source externe) : **68 lignes en base** — 12 `tt_exceptionnel` + 56 `presentiel_exceptionnel` (jours uniques par personne). Sur ces 56, 15 sont confirmés (`confirme = true`) et 41 sont des estimations par défaut (`confirme = false`), à affiner ultérieurement par croisement mail/Teams/calendrier.
+
+Ce qui manque encore : déclenchement automatique du workflow (D5, toujours manuel) ; gestion de la rotation annuelle du board au 8 octobre (bascule d'une saison à l'autre non construite) ; affinage des jours non confirmés via d'autres sources.
 
 ---
 
@@ -282,7 +286,8 @@ Ce qui manque encore : le node n8n Monday.com sur le board `5033664702` (bloqué
 - Chantier dédié : interprétation Ollama pour détecter les "points" de l'azimut Calendrier & temps
 - Brancher Outlook comme deuxième source calendrier (nécessite app registration Azure)
 - Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
-- Suivi Présentiel/TT (D33) : node n8n Monday.com (nécessite Mac Maison ou migration Oracle Cloud faite d'abord) + Code node de classification TT/présentiel exceptionnel + gestion de la rotation annuelle du board au 8 octobre
+- Suivi Présentiel/TT (D33) : gestion de la rotation annuelle du board au 8 octobre (bascule d'une saison à l'autre non construite) ; affinage des jours non confirmés (`confirme = false`) par croisement mail/Teams/calendrier ; déclenchement automatique du workflow (D5, encore manuel)
+- Migration n8n vers Oracle Cloud Free Tier (D30/D21) — toujours pertinente pour lever la dépendance au Mac Maison sur les workflows nécessitant Docker local
 - Dette technique : le schéma Supabase initial (24 août — `points`, `tours`, `contexte_journee`) n'a jamais été versionné sur GitHub, contrairement à celui de D33 — à corriger à l'occasion, non bloquant
 
 ---
