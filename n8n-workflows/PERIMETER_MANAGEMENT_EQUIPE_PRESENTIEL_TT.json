@@ -29,7 +29,7 @@
       "typeVersion": 1.3,
       "position": [
         -400,
-        -368
+        -624
       ],
       "id": "9be5fd73-2c57-49dd-8567-035261c3daaf",
       "name": "Get many events",
@@ -48,7 +48,7 @@
       "typeVersion": 2,
       "position": [
         -176,
-        -368
+        -624
       ],
       "id": "d73a051c-9745-4360-9f8e-30e5fd0dda05",
       "name": "Code in JavaScript"
@@ -81,7 +81,7 @@
       "typeVersion": 4.5,
       "position": [
         48,
-        -368
+        -624
       ],
       "id": "343d9fd6-8dcc-46a5-ac7d-c9e8d90801fc",
       "name": "HTTP Request",
@@ -94,37 +94,13 @@
     },
     {
       "parameters": {
-        "resource": "boardItem",
-        "operation": "getByColumnValue",
-        "boardId": "5033664702",
-        "columnId": "statut_prod__1",
-        "columnValue": "Absence",
-        "returnAll": true
-      },
-      "type": "n8n-nodes-base.mondayCom",
-      "typeVersion": 1,
-      "position": [
-        304,
-        -368
-      ],
-      "id": "338abd4f-2ba1-4f4a-8478-fa6c65520bc3",
-      "name": "Get items item by column value",
-      "credentials": {
-        "mondayComApi": {
-          "id": "aADwqbH425CplbKn",
-          "name": "Monday.com account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "jsCode": "// Roster : prénom détecté dans le nom de l'item -> nom complet (D34)\nconst ROSTER = {\n  THOMAS: 'Thomas Clicteur',\n  ANTOINE: 'Antoine Paley',\n  CHARLYNE: 'Charlyne Féneant',\n  LISA: 'Lisa Mazal',\n  MAELLE: 'Maëlle Das Neves',\n  MAËLLE: 'Maëlle Das Neves'\n};\n\n// Jours normalement présentiel (rythme D34, en vigueur depuis le 13/10/2025)\n// JS getUTCDay() : 0=dimanche, 1=lundi, 2=mardi, 3=mercredi, 4=jeudi, 5=vendredi, 6=samedi\nconst JOURS_PRESENTIEL = [3, 4];\n\nfunction toTokens(str) {\n  return (str || '').toUpperCase().split(/[^A-ZÀ-Ÿ]+/).filter(Boolean);\n}\n\nfunction findColumn(columnValues, title) {\n  return columnValues.find(c => c.column && c.column.title === title);\n}\n\nfunction datesInRange(fromStr, toStr) {\n  const dates = [];\n  let current = new Date(fromStr + 'T00:00:00Z');\n  const end = new Date(toStr + 'T00:00:00Z');\n  while (current <= end) {\n    dates.push(current.toISOString().slice(0, 10));\n    current.setUTCDate(current.getUTCDate() + 1);\n  }\n  return dates;\n}\n\nconst results = [];\n\nfor (const inputItem of $input.all()) {\n  const item = inputItem.json;\n  const columnValues = item.column_values || [];\n\n  const statutCol = findColumn(columnValues, 'Statut Prod');\n  const statut = statutCol ? statutCol.text : null;\n\n  if (statut !== 'Absence') {\n    continue; // sécurité : normalement déjà filtré en amont par le node Monday\n  }\n\n  const tokens = toTokens(item.name);\n  const isTT = tokens.includes('TT'); // exclut naturellement RTT (token différent) — D35\n\n  if (!isTT) {\n    continue; // pas un TT (RTT, congé, école, formation... hors scope D33)\n  }\n\n  const personToken = tokens.find(t => ROSTER[t]);\n  const personne = personToken ? ROSTER[personToken] : null;\n\n  if (!personne) {\n    results.push({\n      json: {\n        _statut: 'ambigu',\n        _raison: 'Item classé TT mais aucune personne du roster reconnue dans le nom',\n        source_monday_item_id: item.id,\n        source_monday_item_name: item.name\n      }\n    });\n    continue;\n  }\n\n  // Récupérer la période (avec filet de sécurité sur Date de tournage — cas TT_MAELLE)\n  const periodeCol = findColumn(columnValues, 'Période');\n  let from = null, to = null;\n\n  if (periodeCol && periodeCol.value) {\n    const parsed = JSON.parse(periodeCol.value);\n    from = parsed.from;\n    to = parsed.to;\n  } else {\n    const dateTournageCol = findColumn(columnValues, 'Date de tournage');\n    if (dateTournageCol && dateTournageCol.value) {\n      const parsed = JSON.parse(dateTournageCol.value);\n      from = parsed.date;\n      to = parsed.date;\n    }\n  }\n\n  if (!from || !to) {\n    results.push({\n      json: {\n        _statut: 'ambigu',\n        _raison: 'Item classé TT mais aucune date exploitable (ni Période ni Date de tournage)',\n        source_monday_item_id: item.id,\n        source_monday_item_name: item.name\n      }\n    });\n    continue;\n  }\n\n  // Un événement \"tt_exceptionnel\" par jour normalement présentiel couvert par la période\n  for (const date of datesInRange(from, to)) {\n    const jour = new Date(date + 'T00:00:00Z').getUTCDay();\n    if (JOURS_PRESENTIEL.includes(jour)) {\n      results.push({\n        json: {\n          personne,\n          date,\n          type: 'tt_exceptionnel',\n          source_monday_item_id: item.id,\n          source_monday_item_name: item.name\n        }\n      });\n    }\n  }\n}\n\nreturn results;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         560,
-        -368
+        -624
       ],
       "id": "4e2ff210-3096-4c03-8955-fc81db412d21",
       "name": "Code in JavaScript1"
@@ -157,7 +133,7 @@
       "typeVersion": 4.5,
       "position": [
         784,
-        -368
+        -624
       ],
       "id": "e3b5a9e8-5a99-46e4-ad28-13740601c59f",
       "name": "HTTP Request1",
@@ -167,6 +143,191 @@
           "name": "Supabase Perimeter"
         }
       }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getByColumnValue",
+        "boardId": "5033664702",
+        "columnId": "statut_prod__1",
+        "columnValue": "Absence",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        304,
+        -624
+      ],
+      "id": "338abd4f-2ba1-4f4a-8478-fa6c65520bc3",
+      "name": "Get items item by column value (Télétravail)",
+      "credentials": {
+        "mondayComApi": {
+          "id": "aADwqbH425CplbKn",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.monday.com/v2",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mondayComApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: 'query { boards(ids: [5033664702]) { items_page(limit: 500) { cursor items { id name column_values(ids: [\"statut_prod__1\",\"date_de_tournage__1\",\"multiple_person_mm2nebaq\",\"color_mm0rq1f\",\"label_1__1\"]) { id text value column { title } } } } } }' }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -496,
+        -368
+      ],
+      "id": "0cbefae8-4d26-4964-b879-d863fe0a3baa",
+      "name": "Monday GraphQL page 1",
+      "credentials": {
+        "mondayComApi": {
+          "id": "aADwqbH425CplbKn",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst page = response.data.boards[0].items_page;\nreturn [{\n  json: {\n    items: page.items,\n    cursor: page.cursor\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -368
+      ],
+      "id": "ba0d137e-2280-4165-8455-e81bf33b32fb",
+      "name": "Extraire page 1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.monday.com/v2",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mondayComApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: `query { next_items_page(cursor: \"${$json.cursor}\", limit: 500) { cursor items { id name column_values(ids: [\"statut_prod__1\",\"date_de_tournage__1\",\"multiple_person_mm2nebaq\",\"color_mm0rq1f\",\"label_1__1\"]) { id text value column { title } } } } }` }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        16,
+        -368
+      ],
+      "id": "a8c77221-9718-44b4-9a87-ee113bc907e9",
+      "name": "Monday GraphQL page 2",
+      "credentials": {
+        "mondayComApi": {
+          "id": "aADwqbH425CplbKn",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const page1Items = $('Extraire page 1').item.json.items;\nconst page2Response = $input.first().json;\nconst page2Items = page2Response.data.next_items_page.items;\n\nconst allItems = [...page1Items, ...page2Items];\n\nreturn allItems.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        -368
+      ],
+      "id": "ad715561-719f-4fb5-8d90-f8cbe694481a",
+      "name": "Fusionner pages"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ROSTER = {\n  THOMAS: 'Thomas Clicteur',\n  ANTOINE: 'Antoine Paley',\n  CHARLYNE: 'Charlyne Féneant',\n  LISA: 'Lisa Mazal',\n  MAELLE: 'Maëlle Das Neves',\n  MAËLLE: 'Maëlle Das Neves',\n  MARTIN: 'Martin Pavloff',\n  MPAVLOFF: 'Martin Pavloff'\n};\n\nconst RYTHMES = [\n  { depuis: '2025-10-13', jours_tt: [1, 2, 5] },\n  { depuis: '2024-09-01', jours_tt: [1, 4, 5] }\n];\n\nconst POLES_EXCLUS = ['STUDYADVISOR', 'SOLO REDAC', 'POLE ?'];\n\nfunction joursTTPourDate(date) {\n  for (const rythme of RYTHMES) {\n    if (date >= rythme.depuis) return rythme.jours_tt;\n  }\n  return null;\n}\n\nfunction normalize(str) {\n  return (str || '').toUpperCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n}\n\nfunction toTokens(str) {\n  return normalize(str).split(/[^A-Z]+/).filter(Boolean);\n}\n\nfunction findColumn(columnValues, title) {\n  return columnValues.find(c => c.column && c.column.title === title);\n}\n\nfunction matchRoster(text) {\n  const tokens = toTokens(text);\n  if (tokens.includes('VASSAS')) return null;\n  const token = tokens.find(t => ROSTER[t]);\n  return token ? ROSTER[token] : null;\n}\n\nconst results = [];\n\nfor (const inputItem of $input.all()) {\n  const item = inputItem.json;\n  const columnValues = item.column_values || [];\n\n  // Filtre Pôles : on ignore les tournages où la Cellule Vidéo n'intervient pas\n  const polesCol = findColumn(columnValues, 'Pôles');\n  const poleNorm = normalize(polesCol ? polesCol.text : '');\n  if (POLES_EXCLUS.includes(poleNorm)) continue;\n\n  const statutCol = findColumn(columnValues, 'Statut Prod');\n  const statut = statutCol ? statutCol.text : null;\n  if (!statut || statut === 'Absence') continue;\n\n  const dateCol = findColumn(columnValues, 'Date de tournage');\n  if (!dateCol || !dateCol.value) continue;\n\n  const parsedDate = JSON.parse(dateCol.value);\n  const date = parsedDate.date;\n  if (!date) continue;\n\n  const joursTT = joursTTPourDate(date);\n  if (!joursTT) continue;\n\n  const jour = new Date(date + 'T00:00:00Z').getUTCDay();\n  if (!joursTT.includes(jour)) continue;\n\n  const respCol = findColumn(columnValues, 'Resp. Tournage');\n  const respText = respCol ? respCol.text : '';\n\n  const personnesTrouvees = new Set();\n\n  if (respText && respText.trim() !== '') {\n    const fragments = respText.split(',').map(f => f.trim()).filter(Boolean);\n    for (const fragment of fragments) {\n      const personne = matchRoster(fragment);\n      if (personne) personnesTrouvees.add(personne);\n    }\n  }\n\n  if (personnesTrouvees.size === 0) {\n    const backupCol = findColumn(columnValues, 'Responsable Backup');\n    const backupText = backupCol ? backupCol.text : '';\n    const personne = matchRoster(backupText);\n    if (personne) personnesTrouvees.add(personne);\n  }\n\n  if (personnesTrouvees.size > 0) {\n    for (const personne of personnesTrouvees) {\n      results.push({\n        json: {\n          personne,\n          date,\n          type: 'presentiel_exceptionnel',\n          confirme: true,\n          source_monday_item_id: item.id,\n          source_monday_item_name: item.name\n        }\n      });\n    }\n  } else {\n    // Personne identifiée -> attribution par défaut à Martin, marquée non confirmée\n    results.push({\n      json: {\n        personne: 'Martin Pavloff',\n        date,\n        type: 'presentiel_exceptionnel',\n        confirme: false,\n        source_monday_item_id: item.id,\n        source_monday_item_name: item.name\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        -368
+      ],
+      "id": "5c982002-8570-46a7-a8e4-611b81e131b2",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://xyipzoqljzgzyexksczy.supabase.co/rest/v1/presentiel_tt_evenements?on_conflict=personne,date,type",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        896,
+        -368
+      ],
+      "id": "5981e745-fceb-4601-9a92-26b7b8b0c301",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "vCvxA5SBw8kfH0Y6",
+          "name": "Supabase Perimeter"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// On ne garde que les vrais événements — les items 'ambigu' restent visibles dans la sortie du node précédent pour vérification manuelle, mais ne partent pas vers Supabase.\nreturn $input.all().filter(i => i.json.type === 'presentiel_exceptionnel');"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -368
+      ],
+      "id": "5ec83e1d-8cd8-4c8f-9b48-3c95c3964ab1",
+      "name": "Filtrer ambigus"
     }
   ],
   "pinData": {},
@@ -208,18 +369,7 @@
       "main": [
         [
           {
-            "node": "Get items item by column value",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get items item by column value": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript1",
+            "node": "Get items item by column value (Télétravail)",
             "type": "main",
             "index": 0
           }
@@ -236,6 +386,94 @@
           }
         ]
       ]
+    },
+    "Get items item by column value (Télétravail)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Monday GraphQL page 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monday GraphQL page 1": {
+      "main": [
+        [
+          {
+            "node": "Extraire page 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraire page 1": {
+      "main": [
+        [
+          {
+            "node": "Monday GraphQL page 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monday GraphQL page 2": {
+      "main": [
+        [
+          {
+            "node": "Fusionner pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fusionner pages": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Filtrer ambigus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrer ambigus": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -244,7 +482,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "64027d13-a96e-46fb-9d29-6ac08eefaf33",
+  "versionId": "477829b2-fb99-422f-afc1-fc1ab980846b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "62f855b0672723fb08c44a05c80ade774205ae869c5b6548fd87762d8d14fc6e"
