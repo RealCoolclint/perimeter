@@ -40,7 +40,7 @@ Critère de sélection : la douleur ressentie prime sur la facilité technique.
 - **Pilotage de projets** — Monday, chantiers en retard, statuts
 - **Carrière & opportunités** — offres d'emploi, candidatures
 - **Management d'équipe** — 1-to-1, charge des collaborateurs. Azimut hybride (D27, D28) :
-  - *Automatique V1* : 1-to-1 en retard (calendrier, motif `Point Hebdo [Nom] x Martin`, seuil 10 jours sans occurrence) ; charge en retard/bloquée par collaborateur (Monday)
+  - *Automatique V1* : 1-to-1 en retard (calendrier, motif `Point Hebdo [Nom] x Martin`, seuil 10 jours sans occurrence) ; charge en retard/bloquée par collaborateur (Monday) ; suivi Présentiel/TT par personne (D33)
   - *Manuel V1* : tension à adresser, feedback en attente, autre (note libre) — champs non automatisables
   - *Automatique V2* : signal mail via lecture Ollama du contenu (pas un simple mot-clé), scope étroit à cet azimut, indépendant de la construction complète de l'azimut Boîte mail (toujours reporté)
 
@@ -255,6 +255,7 @@ Suite à un retour détaillé de ChatGPT sur le module carrière (comparaison av
 - **D30** — n8n : développement et validation en local (Docker) d'abord, migration vers Oracle Cloud Free Tier (D21) une fois la logique métier stable — évite de mélanger debug infrastructure et debug logique.
 - **D31** — Azimut Calendrier & temps : la notion de "point" nécessite une interprétation intelligente du calendrier (Ollama), pas une convention manuelle (préfixe de titre, Google Tasks, calendrier dédié). Chantier dédié à part, dissocié du calcul du poids journée (D16) qui lui est déjà implémenté et fonctionnel.
 - **D32** — Détection "journée de tournage/terrain" (D16) : basée sur le champ Lieu des événements calendrier, comparé à une liste de lieux "bureau" connus, affinée avec l'usage réel.
+- **D33** — Nouvel azimut/sous-fonctionnalité "Suivi Présentiel/TT" (Management d'équipe) : tableau vivant par personne, alimenté depuis Monday.com (board `5033664702`, rotation annuelle au 8 octobre — archives conservées). Deux types d'événements suivis : présentiel exceptionnel (tournage planifié un jour TT théorique) et TT exceptionnel (item "TT [Prénom]" sur une période présentielle). Aucun calcul de compensation ni de solde correctif — collecte factuelle et datée à visée d'argumentation (cf. note de service RH du 24/07/2026). Rythme fixe par personne à enregistrer en config datée (a déjà changé une fois, le 13/10/2025).
 
 ---
 
@@ -273,6 +274,7 @@ Ce qui n'est pas encore couvert par ce premier azimut : les "points" proprement 
 - Chantier dédié : interprétation Ollama pour détecter les "points" de l'azimut Calendrier & temps
 - Brancher Outlook comme deuxième source calendrier (nécessite app registration Azure)
 - Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
+- Construction du chantier Suivi Présentiel/TT (D33) : workflow n8n Monday.com → Supabase, config datée des rythmes fixes par personne, gestion de la rotation annuelle du board au 8 octobre
 
 ---
 
