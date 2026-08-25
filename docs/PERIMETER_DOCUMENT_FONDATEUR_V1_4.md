@@ -273,7 +273,6 @@ Ce qui n'est pas encore couvert par ce premier azimut : les "points" proprement 
 - Chantier dédié : interprétation Ollama pour détecter les "points" de l'azimut Calendrier & temps
 - Brancher Outlook comme deuxième source calendrier (nécessite app registration Azure)
 - Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
-- Fichier `PERIMETER_VEILLE_OPENSOURCE.md` à reconstituer (perdu lors du passage en ressources projet, non retrouvé dans les recherches du 24 août)
 
 ---
 
