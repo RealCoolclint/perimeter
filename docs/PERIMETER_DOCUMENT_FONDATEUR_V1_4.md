@@ -1,7 +1,7 @@
 # PERIMETER — Document Fondateur
 
 *Projet personnel de Martin Pavloff — hors Tranquility Suite*
-*Version 1.3 — 24 août 2026*
+*Version 1.4 — 25 août 2026*
 
 ---
 
@@ -36,7 +36,7 @@ Perimeter fait le tour des préoccupations quotidiennes et générales de Martin
 
 Critère de sélection : la douleur ressentie prime sur la facilité technique.
 
-- **Calendrier & temps** — charge de la journée, présentiel/télétravail
+- **Calendrier & temps** — charge de la journée, présentiel/télétravail (poids journée implémenté, D16 ; détection des points reportée, voir D31)
 - **Pilotage de projets** — Monday, chantiers en retard, statuts
 - **Carrière & opportunités** — offres d'emploi, candidatures
 - **Management d'équipe** — 1-to-1, charge des collaborateurs. Azimut hybride (D27, D28) :
@@ -251,13 +251,29 @@ Suite à un retour détaillé de ChatGPT sur le module carrière (comparaison av
 - **D26** — Échelle de normalisation actée : urgence 1-5, ancienneté en semaines, courbe saturante `charge/(charge+k)` par azimut (k dérivé des seuils D15), charge réelle jamais plafonnée, seul l'affichage sature ; charge totale centrale = moyenne des fractions normalisées × 100
 - **D27** — Azimut Management d'équipe, structure V1 hybride : automatique (1-to-1 en retard via motif calendrier `Point Hebdo [Nom] x Martin`, seuil 10 jours ; charge Monday en retard/bloquée par collaborateur), manuel (tension à adresser, feedback en attente, autre)
 - **D28** — Signal mail sur Management d'équipe reporté en V2, lecture Ollama du contenu (pas un mot-clé), scope étroit à cet azimut, indépendant de la construction complète de l'azimut Boîte mail (toujours reporté)
+- **D29** — Repo `perimeter` passé en public pour garantir l'accès direct de JARVIS (lecture seule via clone Git standard, sans authentification). Condition de réversibilité actée : dès que Perimeter contient de la donnée réelle sensible (tensions d'équipe nominatives, candidatures en cours), la question du retour en privé doit être reposée.
+- **D30** — n8n : développement et validation en local (Docker) d'abord, migration vers Oracle Cloud Free Tier (D21) une fois la logique métier stable — évite de mélanger debug infrastructure et debug logique.
+- **D31** — Azimut Calendrier & temps : la notion de "point" nécessite une interprétation intelligente du calendrier (Ollama), pas une convention manuelle (préfixe de titre, Google Tasks, calendrier dédié). Chantier dédié à part, dissocié du calcul du poids journée (D16) qui lui est déjà implémenté et fonctionnel.
+- **D32** — Détection "journée de tournage/terrain" (D16) : basée sur le champ Lieu des événements calendrier, comparé à une liste de lieux "bureau" connus, affinée avec l'usage réel.
+
+---
+
+## 10bis. État d'implémentation (25 août 2026)
+
+Premier azimut construit de bout en bout : **Calendrier & temps — poids journée (D16)**.
+
+Pipeline fonctionnel : Google Calendar (OAuth2) → n8n (local, Docker) → calcul du poids journée → Supabase (table `contexte_journee`). Testé avec une donnée réelle, confirmé dans le Table Editor.
+
+Ce qui n'est pas encore couvert par ce premier azimut : les "points" proprement dits (D31, reporté), la source Outlook (reportée), le déclenchement automatique à l'ouverture de session (D5, encore manuel à ce stade).
 
 ---
 
 ## 11. Ce qui reste à trancher
 
+- Versionner le workflow n8n "Calendrier & temps — poids journée" (export JSON dans le repo) — actuellement seulement stocké dans le volume Docker local, aucun backup
+- Chantier dédié : interprétation Ollama pour détecter les "points" de l'azimut Calendrier & temps
+- Brancher Outlook comme deuxième source calendrier (nécessite app registration Azure)
 - Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
-- Première implémentation : schéma Supabase, premiers workflows n8n, premier azimut construit de bout en bout
 - Fichier `PERIMETER_VEILLE_OPENSOURCE.md` à reconstituer (perdu lors du passage en ressources projet, non retrouvé dans les recherches du 24 août)
 
 ---
