@@ -270,7 +270,6 @@ Ce qui n'est pas encore couvert par ce premier azimut : les "points" proprement 
 
 ## 11. Ce qui reste à trancher
 
-- Versionner le workflow n8n "Calendrier & temps — poids journée" (export JSON dans le repo) — actuellement seulement stocké dans le volume Docker local, aucun backup
 - Chantier dédié : interprétation Ollama pour détecter les "points" de l'azimut Calendrier & temps
 - Brancher Outlook comme deuxième source calendrier (nécessite app registration Azure)
 - Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
