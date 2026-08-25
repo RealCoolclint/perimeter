@@ -1,7 +1,7 @@
 # PERIMETER — Document Fondateur
 
 *Projet personnel de Martin Pavloff — hors Tranquility Suite*
-*Version 1.4 — 25 août 2026*
+*Version 1.5 — 25 août 2026*
 
 ---
 
@@ -40,7 +40,7 @@ Critère de sélection : la douleur ressentie prime sur la facilité technique.
 - **Pilotage de projets** — Monday, chantiers en retard, statuts
 - **Carrière & opportunités** — offres d'emploi, candidatures
 - **Management d'équipe** — 1-to-1, charge des collaborateurs. Azimut hybride (D27, D28) :
-  - *Automatique V1* : 1-to-1 en retard (calendrier, motif `Point Hebdo [Nom] x Martin`, seuil 10 jours sans occurrence) ; charge en retard/bloquée par collaborateur (Monday) ; suivi Présentiel/TT par personne (D33)
+  - *Automatique V1* : 1-to-1 en retard (calendrier, motif `Point Hebdo [Nom] x Martin`, seuil 10 jours sans occurrence) ; charge en retard/bloquée par collaborateur (Monday) ; suivi Présentiel/TT par personne (D33) — rythme fixe confirmé (D34) : lundi/mardi/vendredi TT, mercredi/jeudi présentiel, identique pour toute l'équipe suivie, en vigueur depuis le 13/10/2025
   - *Manuel V1* : tension à adresser, feedback en attente, autre (note libre) — champs non automatisables
   - *Automatique V2* : signal mail via lecture Ollama du contenu (pas un simple mot-clé), scope étroit à cet azimut, indépendant de la construction complète de l'azimut Boîte mail (toujours reporté)
 
@@ -256,6 +256,8 @@ Suite à un retour détaillé de ChatGPT sur le module carrière (comparaison av
 - **D31** — Azimut Calendrier & temps : la notion de "point" nécessite une interprétation intelligente du calendrier (Ollama), pas une convention manuelle (préfixe de titre, Google Tasks, calendrier dédié). Chantier dédié à part, dissocié du calcul du poids journée (D16) qui lui est déjà implémenté et fonctionnel.
 - **D32** — Détection "journée de tournage/terrain" (D16) : basée sur le champ Lieu des événements calendrier, comparé à une liste de lieux "bureau" connus, affinée avec l'usage réel.
 - **D33** — Nouvel azimut/sous-fonctionnalité "Suivi Présentiel/TT" (Management d'équipe) : tableau vivant par personne, alimenté depuis Monday.com (board `5033664702`, rotation annuelle au 8 octobre — archives conservées). Deux types d'événements suivis : présentiel exceptionnel (tournage planifié un jour TT théorique) et TT exceptionnel (item "TT [Prénom]" sur une période présentielle). Aucun calcul de compensation ni de solde correctif — collecte factuelle et datée à visée d'argumentation (cf. note de service RH du 24/07/2026). Rythme fixe par personne à enregistrer en config datée (a déjà changé une fois, le 13/10/2025).
+- **D34** — Rythme fixe D33 confirmé et datée : un seul rythme, identique pour toute l'équipe suivie (Thomas Clicteur, Antoine Paley, Charlyne Féneant, Lisa Mazal, Maëlle Das Neves) — TT lundi/mardi/vendredi, présentiel mercredi/jeudi, en vigueur depuis le **13/10/2025**. Règle de désambiguïsation actée : "Antoine" seul dans un item Monday désigne toujours Antoine Paley (jamais Antoine Vassas, hors équipe directe). Périodes "école" des alternantes (Charlyne, Lisa, Maëlle) traitées comme hors-jeu — aucune détection TT/présentiel appliquée ces jours-là, pas de logique de priorité construite pour ce cas rare.
+- **D35** — Source de détection TT/RTT sur le board `5033664702` : colonnes `Période - Start` / `Période - End` (109 des 114 lignes `Statut Prod = Absence` renseignées), pas `Date de tournage`. Règle de classification : le mot "TT" doit être détecté comme token isolé, jamais comme sous-chaîne de "RTT" (piège identifié : "RTT" contient "TT"). Le filtre `Statut Prod = Absence` + `Période` non vide exclut naturellement les lignes mal taguées (vraies productions classées par erreur en Absence).
 
 ---
 
@@ -267,6 +269,12 @@ Pipeline fonctionnel : Google Calendar (OAuth2) → n8n (local, Docker) → calc
 
 Ce qui n'est pas encore couvert par ce premier azimut : les "points" proprement dits (D31, reporté), la source Outlook (reportée), le déclenchement automatique à l'ouverture de session (D5, encore manuel à ce stade).
 
+### 10ter. État d'implémentation — Suivi Présentiel/TT (D33, 25 août 2026)
+
+Schéma Supabase créé et versionné (`supabase/migrations/20260825000001_presentiel_tt_schema.sql`) : tables `rythme_config` (config datée, ligne 13/10/2025 insérée) et `presentiel_tt_evenements` (contrainte unique personne+date+type, RLS service_role). Règles de détection actées (D34, D35).
+
+Ce qui manque encore : le node n8n Monday.com sur le board `5033664702` (bloqué — n8n Docker local n'existe que sur le Mac Maison, voir Point de vigilance section 7) ; le Code node de classification (TT isolé vs RTT, croisement présentiel exceptionnel) ; l'écriture effective des événements dans `presentiel_tt_evenements`.
+
 ---
 
 ## 11. Ce qui reste à trancher
@@ -274,7 +282,8 @@ Ce qui n'est pas encore couvert par ce premier azimut : les "points" proprement 
 - Chantier dédié : interprétation Ollama pour détecter les "points" de l'azimut Calendrier & temps
 - Brancher Outlook comme deuxième source calendrier (nécessite app registration Azure)
 - Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
-- Construction du chantier Suivi Présentiel/TT (D33) : workflow n8n Monday.com → Supabase, config datée des rythmes fixes par personne, gestion de la rotation annuelle du board au 8 octobre
+- Suivi Présentiel/TT (D33) : node n8n Monday.com (nécessite Mac Maison ou migration Oracle Cloud faite d'abord) + Code node de classification TT/présentiel exceptionnel + gestion de la rotation annuelle du board au 8 octobre
+- Dette technique : le schéma Supabase initial (24 août — `points`, `tours`, `contexte_journee`) n'a jamais été versionné sur GitHub, contrairement à celui de D33 — à corriger à l'occasion, non bloquant
 
 ---
 
