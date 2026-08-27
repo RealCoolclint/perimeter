@@ -1,7 +1,7 @@
 # PERIMETER — Document Fondateur
 
 *Projet personnel de Martin Pavloff — hors Tranquility Suite*
-*Version 1.6 — 25 août 2026*
+*Version 1.7 — 25 août 2026*
 
 ---
 
@@ -260,6 +260,7 @@ Suite à un retour détaillé de ChatGPT sur le module carrière (comparaison av
 - **D35** — Source de détection TT/RTT sur le board `5033664702` : colonnes `Période - Start` / `Période - End` (109 des 114 lignes `Statut Prod = Absence` renseignées), pas `Date de tournage`. Règle de classification : le mot "TT" doit être détecté comme token isolé, jamais comme sous-chaîne de "RTT" (piège identifié : "RTT" contient "TT"). Le filtre `Statut Prod = Absence` + `Période` non vide exclut naturellement les lignes mal taguées (vraies productions classées par erreur en Absence).
 - **D36** — Rythme antérieur au 13/10/2025 confirmé : présentiel mardi/mercredi (donc TT lundi/jeudi/vendredi), en vigueur depuis le **01/09/2024**. Le Code node de classification gère désormais deux périodes de rythme successives (la plus récente prioritaire), avant le 01/09/2024 aucun rythme n'est appliqué (donnée hors scope).
 - **D37** — Détection présentiel exceptionnel affinée après vérification croisée avec l'export Excel du board (recalcul indépendant, comparé ligne à ligne à la sortie n8n). Trois ajustements actés : (1) filtre sur la colonne `Pôles` — exclusion des tournages où la Cellule Vidéo n'intervient pas (StudyAdvisor, Solo Redac, Pôle ?) ; (2) `Responsable Backup` ajouté comme repli quand `Resp. Tournage` est vide, la personne de backup étant de facto sur le tournage ; (3) quand aucune personne du roster n'est identifiée, le jour est attribué par défaut à **Martin Pavloff** plutôt qu'ignoré, mais marqué comme non confirmé via une colonne booléenne dédiée `confirme` sur la table `presentiel_tt_evenements` — pour distinguer données vérifiées et estimations. Les estimations (`confirme = false`) ont vocation à être affinées ultérieurement par croisement avec mail, Teams et calendrier.
+- **D38** — Quatre éléments du prompt fondateur initial de Perimeter, jamais formellement tranchés, sont actés comme reportés (même statut que les azimuts déjà reportés) : la checklist des éléments nécessaires aux projets du jour/semaine ; la proposition de candidature avec lettre de motivation suivant template Canva ; le rappel des impératifs (distinct des majorations de dates D18) ; la proposition de sous-tâches via agents (probable V3, jamais actée comme telle). Identifiés lors d'un audit de cohérence contre le prompt fondateur d'origine.
 
 ---
 
@@ -289,6 +290,7 @@ Ce qui manque encore : déclenchement automatique du workflow (D5, toujours manu
 - Suivi Présentiel/TT (D33) : gestion de la rotation annuelle du board au 8 octobre (bascule d'une saison à l'autre non construite) ; affinage des jours non confirmés (`confirme = false`) par croisement mail/Teams/calendrier ; déclenchement automatique du workflow (D5, encore manuel)
 - Migration n8n vers Oracle Cloud Free Tier (D30/D21) — toujours pertinente pour lever la dépendance au Mac Maison sur les workflows nécessitant Docker local
 - Dette technique : le schéma Supabase initial (24 août — `points`, `tours`, `contexte_journee`) n'a jamais été versionné sur GitHub, contrairement à celui de D33 — à corriger à l'occasion, non bloquant
+- Les 4 éléments reportés en D38 : checklist projets jour/semaine, candidature + lettre de motivation (template Canva), rappel des impératifs, sous-tâches via agents — aucun n'a de chantier dédié ni d'azimut d'accueil clair pour l'instant, à recadrer le moment venu.
 
 ---
 
