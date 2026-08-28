@@ -1,0 +1,91 @@
+{
+  "name": "PERIMETER_RAPPEL_ROTATION_BOARD",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -480,
+        -320
+      ],
+      "id": "b1c2d3e4-1111-4a2b-8c3d-4e5f60718293",
+      "name": "Tous les jours 8h"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calcule le dernier jour ouvré (lundi-vendredi) strictement avant le 8 octobre de l'année en cours.\n// Ne tient compte que des week-ends, pas des jours fériés — à vérifier manuellement si un jour férié tombe juste avant.\nconst now = new Date();\nconst year = now.getFullYear();\nconst oct8 = new Date(Date.UTC(year, 9, 8));\n\nlet target = new Date(oct8);\ntarget.setUTCDate(target.getUTCDate() - 1);\nwhile (target.getUTCDay() === 0 || target.getUTCDay() === 6) {\n  target.setUTCDate(target.getUTCDate() - 1);\n}\n\nconst targetStr = target.toISOString().slice(0, 10);\nconst todayStr = now.toISOString().slice(0, 10);\n\nif (todayStr === targetStr) {\n  return [{ json: { envoyer: true, date_cible: targetStr, annee: year } }];\n}\n\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -320
+      ],
+      "id": "c2d3e4f5-2222-4a2b-8c3d-4e5f60718294",
+      "name": "Vérifier date rappel"
+    },
+    {
+      "parameters": {
+        "fromEmail": "pavloffmartin@gmail.com",
+        "toEmail": "pavloffmartin@gmail.com",
+        "subject": "=Rappel — Rotation annuelle board Monday Perimeter (avant le 8 octobre {{ $json.annee }})",
+        "text": "Bonjour Martin,\n\nC'est le rappel annuel pour la rotation du board Monday utilisé par Perimeter — à faire avant le 8 octobre.\n\n3 étapes à suivre, à la main comme d'habitude :\n\n1. Dupliquer le board actuel sur Monday.com (structure seule, sans les items)\n2. Vérifier que le nouveau board est correct, puis archiver l'ancien\n3. Ouvrir le workflow n8n \"PERIMETER_MANAGEMENT_EQUIPE_PRESENTIEL_TT\", ouvrir le node \"Config Board ID Saison\", et remplacer le numéro par celui du nouveau board\n\n— JARVIS",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -320
+      ],
+      "id": "d3e4f5a6-3333-4a2b-8c3d-4e5f60718295",
+      "name": "Envoyer rappel email",
+      "credentials": {
+        "smtp": {
+          "id": "PLACEHOLDER_A_REASSIGNER",
+          "name": "SMTP Gmail Perimeter"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Tous les jours 8h": {
+      "main": [
+        [
+          {
+            "node": "Vérifier date rappel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vérifier date rappel": {
+      "main": [
+        [
+          {
+            "node": "Envoyer rappel email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

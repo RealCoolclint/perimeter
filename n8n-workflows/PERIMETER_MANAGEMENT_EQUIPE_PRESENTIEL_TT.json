@@ -148,7 +148,7 @@
       "parameters": {
         "resource": "boardItem",
         "operation": "getByColumnValue",
-        "boardId": "5033664702",
+        "boardId": "={{ $('Config Board ID Saison').first().json.board_id }}",
         "columnId": "statut_prod__1",
         "columnValue": "Absence",
         "returnAll": true
@@ -185,7 +185,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ query: 'query { boards(ids: [5033664702]) { items_page(limit: 500) { cursor items { id name column_values(ids: [\"statut_prod__1\",\"date_de_tournage__1\",\"multiple_person_mm2nebaq\",\"color_mm0rq1f\",\"label_1__1\"]) { id text value column { title } } } } } }' }) }}",
+        "jsonBody": "={{ JSON.stringify({ query: `query { boards(ids: [${$('Config Board ID Saison').first().json.board_id}]) { items_page(limit: 500) { cursor items { id name column_values(ids: [\"statut_prod__1\",\"date_de_tournage__1\",\"multiple_person_mm2nebaq\",\"color_mm0rq1f\",\"label_1__1\"]) { id text value column { title } } } } } }` }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -328,6 +328,19 @@
       ],
       "id": "5ec83e1d-8cd8-4c8f-9b48-3c95c3964ab1",
       "name": "Filtrer ambigus"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { board_id: \"5033664702\" } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        -768
+      ],
+      "id": "f1a2b3c4-6d7e-4f80-9a1b-2c3d4e5f6071",
+      "name": "Config Board ID Saison"
     }
   ],
   "pinData": {},
@@ -336,7 +349,7 @@
       "main": [
         [
           {
-            "node": "Get many events",
+            "node": "Config Board ID Saison",
             "type": "main",
             "index": 0
           }
@@ -469,6 +482,17 @@
         [
           {
             "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Board ID Saison": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
             "type": "main",
             "index": 0
           }
