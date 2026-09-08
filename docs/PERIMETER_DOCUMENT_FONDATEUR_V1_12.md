@@ -302,7 +302,7 @@ Ce qui n'est **pas encore** construit : le pipeline de production qui consommera
 
 Pipeline construit et exécuté de bout en bout dans le workflow n8n `xkS15S1PWCDYULRv` (fichier `n8n-workflows/xkS15S1PWCDYULRv.json`) : Google Calendar + Outlook (fusionnés, sans dédup) → détection terrain via cross-check Monday (nouveau Code node "Détection tournage Martin (jour)", réutilise la logique D37 filtrée sur Martin et la date du jour) → calcul `poids_journee` (D16) → Supabase `contexte_journee`. Conversion UTC → Europe/Paris faite via Luxon natif du Code node (`$now.setZone('Europe/Paris')`, `DateTime.fromISO(..., { zone: 'utc' }).setZone('Europe/Paris')`).
 
-Un premier test complet a réussi mais avec un sous-comptage des événements Outlook (`limit: 5` resté configuré depuis la phase de test initiale). Corrigé (`returnAll: true`). Le re-test après correction n'a pas pu être rejoué avant la fin de session (rate-limit Monday.com temporaire). **À rejouer en priorité à la prochaine session** — pas de raison de doute sur la correction elle-même, juste jamais revérifiée avec les vrais chiffres.
+Un premier test complet a réussi mais avec un sous-comptage des événements Outlook (`limit: 5` resté configuré depuis la phase de test initiale). Corrigé (`returnAll: true`) et **confirmé le 08/09/2026** : 3 événements Outlook / 2h48 de réunions cumulées calculés contre 2h45 réellement prévues sur le calendrier — écart négligeable, cohérent avec un arrondi. Le pipeline est considéré fiable et clos.
 
 Nouvel outil créé pendant ce chantier, réutilisable pour tout futur travail sur les workflows n8n de Perimeter : `n8n-workflows/sync_workflow.sh {id} pull|push`, qui synchronise un fichier JSON local avec l'instance n8n en direct via son API REST (`PUT /api/v1/workflows/{id}`), évitant l'export/import manuel.
 
@@ -311,7 +311,6 @@ Nouvel outil créé pendant ce chantier, réutilisable pour tout futur travail s
 ## 11. Ce qui reste à trancher
 
 - Chantier dédié : interprétation Ollama pour détecter les "points" de l'azimut Calendrier & temps
-- Rejouer le test complet du pipeline Outlook + Monday (D46) après correction du `returnAll`, bloqué en fin de session par un rate-limit Monday.com temporaire — aucune raison de douter du résultat, juste à confirmer avec les vrais chiffres du jour
 - Mise en place concrète du workflow n8n annuel de récupération automatique des dates Parcoursup
 - Suivi Présentiel/TT (D33) : rotation annuelle du board traitée en D43/D44 (config centralisée + rappel email) — reste la duplication/archivage manuels à faire chaque année, et le retraitement du jour du 22/09/2026 une fois le tournage réalisé. Déclenchement automatique du workflow principal (D5) toujours manuel.
 - Migration n8n vers Oracle Cloud Free Tier (D30/D21) — toujours pertinente pour lever la dépendance au Mac Maison sur les workflows nécessitant Docker local
