@@ -1,2 +1,6 @@
 supabase/.temp/
 .DS_Store
+
+# Fichiers de synchronisation temporaires créés par sync_workflow.sh
+# (IDs n8n : 16 caractères alphanumériques purs, sans underscore ni tiret — ex: xkS15S1PWCDYULRv.json)
+n8n-workflows/[A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9].json
