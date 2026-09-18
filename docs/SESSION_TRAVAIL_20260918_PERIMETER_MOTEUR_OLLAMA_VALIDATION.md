@@ -52,7 +52,7 @@ Aucune décision de fond (aucun nouveau D-numéro) — session strictement opér
 |-------------------|--------|------|
 | Node "Parser réponse Ollama" (workflow `xkS15S1PWCDYULRv`) | Correction n8n | ✅ Mode + format de retour corrigés, testé en production |
 | Node "Dédoublonner events Outlook" (nouveau, workflow `xkS15S1PWCDYULRv`) | Nouveau node n8n | ✅ Créé, câblé, testé en production |
-| `n8n-workflows/xkS15S1PWCDYULRv.json` | Sauvegarde workflow | ⏳ À pousser sur `main` en clôture de session |
+| `n8n-workflows/D68_moteur_ollama.json` | Sauvegarde workflow (renommé selon convention) | ⏳ À pousser sur `main` en clôture de session |
 
 ---
 
@@ -81,6 +81,7 @@ git push
 - **API Microsoft Graph (Outlook Calendar) et pagination `Return All`** : peut renvoyer un même événement (même `id`) sur deux pages différentes. Une contrainte d'unicité en base protège contre la corruption de données mais pas contre le gaspillage de calcul en amont — dédoublonner à la source, pas seulement à l'insertion.
 - **Identifiants n8n perdus après relance de l'instance locale** : pas stockés dans Bitwarden ni dans un `.env`/`docker-compose` local détectable — à documenter précisément une fois la source réelle confirmée, pour éviter de perdre du temps la prochaine fois.
 - **Consigne de méthode actée cette session** : ne plus jamais donner un extrait de code à modifier — toujours le bloc de code complet et propre, même pour un changement d'une ligne. Déjà appliqué dans `ways-of-working.md`.
+- **`.gitignore` bloque silencieusement tous les exports bruts de `sync_workflow.sh`** : la règle ligne 6 (`n8n-workflows/[16 caractères alphanumériques].json`) cible exactement le format de nom que produit le script en mode `push` (l'ID brut du workflow n8n). Vérification via `git log --all -- n8n-workflows/` : aucun commit historique ne porte un nom d'ID brut — tous les workflows précédemment versionnés (D16, D33, D43/D44, D46) l'ont été sous un nom lié à leur décision. Ça signifie que depuis l'introduction du script (D46), un `push` suivi d'un commit sans renommage manuel n'a probablement jamais réellement atterri sur GitHub — dérive silencieuse invisible jusqu'à ce jour. **Convention confirmée et à appliquer systématiquement dès maintenant** : toujours renommer le fichier exporté (nom lié à la décision, jamais l'ID brut n8n) avant `git add`.
 
 ---
 
