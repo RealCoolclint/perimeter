@@ -129,13 +129,13 @@ Pipeline validé de bout en bout : 2 points moteur_ollama_outlook_mail en base.
 Décision de Martin : une newsletter avec lien de désabonnement est toujours un
 point, urgence faible (D84) — à implémenter. Fondateur réécrit en V1.20.
 
-Document de référence : PERIMETER_DOCUMENT_FONDATEUR_V1_21.md + récap
+Document de référence : PERIMETER_DOCUMENT_FONDATEUR_V1_22.md + récap
 SESSION_TRAVAIL_20260926_PERIMETER_D53_PORTAGE_OUTLOOK_MAIL.md (repo
 RealCoolclint/perimeter, branche main).
 
 Prochaines étapes, dans l'ordre logique/constructif/sécurisé :
 1. [FAIT le 26/09 au soir — D88] App OAuth Google en production.
-2. Keep-alive Supabase (free tier en pause après 7 jours d'inactivité).
+2. [FAIT le 26/09 au soir — D89] Keep-alive Supabase (GitHub Actions).
 3. D84 : trancher "un point par expéditeur" et l'alignement Gmail sur l'en-tête
    List-Unsubscribe, puis prompt Cursor (brouillon dans le récap), test complet,
    vérification en base.
@@ -166,6 +166,10 @@ Option A retenue par Martin (plutôt que des reconnexions hebdomadaires).
 **Pièges ajoutés au carnet (V53) :** publication OAuth externe bloquée tant que page d'accueil, confidentialité et domaine autorisé manquent, sans que l'interface les marque obligatoires ; téléverser un logo sur l'écran de consentement déclenche une validation Google obligatoire ; les jetons émis en mode Test gardent leur expiration à 7 jours après publication — reconnecter.
 
 **Prompt de continuation — mise à jour :** retirer l'étape 1 (faite) ; le document de référence devient `PERIMETER_DOCUMENT_FONDATEUR_V1_21.md`.
+
+## Addendum 2 — soirée (20h45 → 20h55) : keep-alive Supabase (D89)
+
+GitHub Actions retenu par Martin (plutôt que n8n, dépendant du Mac Maison allumé). Workflow `supabase-keepalive.yml` poussé sur `perimeter-site` (`91506b4`), secret `SUPABASE_ANON_KEY` (clé publique) ajouté par Martin, premier run manuel **vert** (12 s). Fondateur réécrit en **V1.22**. Étape 2 de la liste des prochaines étapes : **faite**. La prochaine session commence donc par **D84**.
 
 ---
 
