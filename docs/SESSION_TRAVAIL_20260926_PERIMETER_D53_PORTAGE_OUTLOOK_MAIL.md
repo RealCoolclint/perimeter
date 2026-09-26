@@ -129,13 +129,12 @@ Pipeline validé de bout en bout : 2 points moteur_ollama_outlook_mail en base.
 Décision de Martin : une newsletter avec lien de désabonnement est toujours un
 point, urgence faible (D84) — à implémenter. Fondateur réécrit en V1.20.
 
-Document de référence : PERIMETER_DOCUMENT_FONDATEUR_V1_20.md + récap
+Document de référence : PERIMETER_DOCUMENT_FONDATEUR_V1_21.md + récap
 SESSION_TRAVAIL_20260926_PERIMETER_D53_PORTAGE_OUTLOOK_MAIL.md (repo
 RealCoolclint/perimeter, branche main).
 
 Prochaines étapes, dans l'ordre logique/constructif/sécurisé :
-1. Passer l'app OAuth Google en "In production" (credentials Calendar/Gmail
-   expirent à 7 jours en "Testing").
+1. [FAIT le 26/09 au soir — D88] App OAuth Google en production.
 2. Keep-alive Supabase (free tier en pause après 7 jours d'inactivité).
 3. D84 : trancher "un point par expéditeur" et l'alignement Gmail sur l'en-tête
    List-Unsubscribe, puis prompt Cursor (brouillon dans le récap), test complet,
@@ -148,6 +147,25 @@ Prochaines étapes, dans l'ordre logique/constructif/sécurisé :
 
 Bonne session !
 ```
+
+---
+
+## Addendum — soirée (19h50 → 20h45) : app OAuth Google en production (D88)
+
+Option A retenue par Martin (plutôt que des reconnexions hebdomadaires).
+
+1. Branding complété (nom `perimeter`, e-mails d'assistance et développeur) — bouton « Publier » toujours grisé.
+2. Cause : Google exige aussi page d'accueil, règles de confidentialité et domaine autorisé (non marqués obligatoires dans l'interface).
+3. Nouveau repo public `RealCoolclint/perimeter-site`, créé par Martin ; `index.html` + `privacy.html` rédigés et poussés par JARVIS (`de604d8`), identité Perimeter (ivoire, Inter, logo hairline SVG) ; GitHub Pages activé par Martin.
+4. URLs renseignées dans Branding, domaine `realcoolclint.github.io` accepté sans preuve de propriété → « Publier l'application » actif → **« En production »**.
+5. Bandeau « doit être validée » ignoré volontairement ; aucun logo téléversé.
+6. Credentials « Google Calendar account » et « Gmail account » reconnectés (écran « application non vérifiée » → Paramètres avancés → Accéder).
+
+**Décision : D88.** Fondateur réécrit en **V1.21**. Étape 1 de la liste des prochaines étapes : **faite**.
+
+**Pièges ajoutés au carnet (V53) :** publication OAuth externe bloquée tant que page d'accueil, confidentialité et domaine autorisé manquent, sans que l'interface les marque obligatoires ; téléverser un logo sur l'écran de consentement déclenche une validation Google obligatoire ; les jetons émis en mode Test gardent leur expiration à 7 jours après publication — reconnecter.
+
+**Prompt de continuation — mise à jour :** retirer l'étape 1 (faite) ; le document de référence devient `PERIMETER_DOCUMENT_FONDATEUR_V1_21.md`.
 
 ---
 
