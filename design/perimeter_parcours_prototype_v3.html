@@ -5,7 +5,7 @@
 <title>Perimeter — parcours en 4 étapes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --perimeter-obsidian: #111111;
@@ -19,13 +19,23 @@
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: var(--perimeter-ivory); color: var(--perimeter-obsidian); font-family: 'Inter', sans-serif; }
-  body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 56px 24px; }
-  .page { width: 100%; max-width: 680px; }
+  body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 56px 24px; position: relative; }
+  .page { width: 100%; max-width: 680px; position: relative; z-index: 1; }
+  .page.wide { max-width: 1040px; }
+
+  .paper-grain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
 
   .stepper { display: flex; justify-content: center; gap: 14px; margin-bottom: 40px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; border: 1.4px solid var(--perimeter-obsidian); background: transparent; cursor: pointer; padding: 0; }
   .dot.done { background: var(--perimeter-obsidian); }
-  .dot.current { background: var(--perimeter-obsidian); box-shadow: 0 0 0 3px var(--perimeter-ivory), 0 0 0 4.4px var(--perimeter-obsidian); }
+  .dot.current { background: var(--perimeter-obsidian); outline: 1.4px solid var(--perimeter-obsidian); outline-offset: 3px; }
 
   .hairline { border: none; border-top: 1px solid var(--perimeter-hairline); margin: 0; }
   .head-row { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0 12px; }
@@ -38,16 +48,28 @@
 
   .circle-wrap { position: relative; width: 100%; max-width: 520px; margin: 0 auto; }
   svg { width: 100%; height: auto; display: block; overflow: visible; }
-  .ring { fill: var(--perimeter-obsidian); }
-  .ring.faded { fill: var(--perimeter-ink-faint); }
-  .leader { stroke: var(--perimeter-hairline); stroke-width: 1; fill: none; }
-  .leader-dot { fill: var(--perimeter-obsidian); }
-  .label { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 13.5px; fill: var(--perimeter-obsidian); }
-  .readout { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; fill: var(--perimeter-slate); letter-spacing: 0.03em; }
-  .caution-flag { fill: var(--rubric); }
-  .caution-label { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 9px; fill: var(--perimeter-ivory); letter-spacing: 0.06em; }
+  .ring-path { fill: none; stroke: var(--perimeter-obsidian); stroke-width: 2; }
+  .azimut-dot { fill: var(--perimeter-obsidian); stroke: none; transition: r 0.15s ease; }
+  .azimut-hit { fill: transparent; stroke: none; cursor: pointer; }
   .center-eyebrow { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; fill: var(--perimeter-ink-faint); letter-spacing: 0.08em; }
   .center-value { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; font-size: 22px; fill: var(--perimeter-obsidian); }
+  .center-sub { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 12px; fill: var(--perimeter-slate); }
+
+  .trace-layout { display: flex; gap: 40px; align-items: flex-start; }
+  .trace-circle { flex: 0 0 600px; width: 600px; max-width: 100%; }
+  .trace-legend { flex: 1; min-width: 0; }
+  .legend-head { padding-bottom: 10px; border-bottom: 1px solid var(--perimeter-hairline); margin-bottom: 0; }
+  .legend-row {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 10px 8px; border-bottom: 1px solid var(--perimeter-hairline);
+    cursor: pointer; transition: background 0.15s ease;
+  }
+  .legend-row:hover,
+  .legend-row.is-active { background: var(--perimeter-paper); }
+  .legend-num { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--perimeter-slate); width: 22px; flex-shrink: 0; }
+  .legend-name { font-size: 14px; font-weight: 700; color: var(--perimeter-obsidian); flex: 1; min-width: 0; }
+  .legend-pts { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--perimeter-slate); flex-shrink: 0; }
+  .legend-seuil { font-size: 10px; color: var(--rubric); letter-spacing: 0.04em; flex-shrink: 0; }
 
   .go-btn {
     display: block; margin: 36px auto 0; font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums;
@@ -88,11 +110,31 @@
   .nav-btn:disabled { opacity: 0.25; cursor: default; }
 
   .foot-row { display: flex; justify-content: space-between; padding: 12px 0 0; font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; letter-spacing: 0.05em; color: var(--perimeter-ink-faint); }
+
+  @media (max-width: 900px) {
+    .trace-layout { flex-direction: column; }
+    .trace-circle { flex: none; width: 100%; max-width: 520px; margin: 0 auto; }
+  }
 </style>
 </head>
 <body>
 
-<div class="page">
+<svg class="paper-grain" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="paperGrainFilter" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
+      <feColorMatrix in="noise" type="matrix"
+        values="0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 0.55 0"
+        result="alphaNoise"/>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="var(--perimeter-obsidian)" opacity="0.05" filter="url(#paperGrainFilter)"/>
+</svg>
+
+<div class="page" id="page">
 
   <div class="stepper" id="stepper">
     <button class="dot" data-step="1" aria-label="Étape 1"></button>
@@ -113,10 +155,9 @@
     <h1>Bonjour, Martin</h1>
     <p class="subhead">le tracé du jour n'a pas encore commencé</p>
     <div class="circle-wrap">
-      <svg viewBox="0 0 640 640" overflow="visible">
-        <path id="ringPath1" class="ring" fill-rule="evenodd"></path>
-        <text x="320" y="312" text-anchor="middle" class="center-eyebrow">dernier tour</text>
-        <text x="320" y="334" text-anchor="middle" class="center-value" style="font-size:16px;">hier, 18h40</text>
+      <svg id="svg1" viewBox="0 0 600 600" overflow="visible">
+        <text x="300" y="292" text-anchor="middle" class="center-eyebrow">dernier tour</text>
+        <text x="300" y="314" text-anchor="middle" class="center-value" style="font-size:16px;">hier, 18h40</text>
       </svg>
     </div>
     <button class="go-btn" id="launchBtn">Lancer le tour</button>
@@ -125,15 +166,16 @@
   <!-- STEP 2 — Tracé -->
   <section class="step" data-step="2">
     <h1>Le tracé de ce matin</h1>
-    <p class="subhead">quatre azimuts, un seul trait</p>
-    <div class="circle-wrap">
-      <svg viewBox="0 0 640 640" overflow="visible">
-        <path id="ringPath2" class="ring" fill-rule="evenodd"></path>
-        <text x="320" y="312" text-anchor="middle" class="center-eyebrow">charge totale</text>
-        <text x="320" y="338" text-anchor="middle" class="center-value" id="centerValue2">48</text>
-        <g id="leadersGroup2"></g>
-        <g id="labelsGroup2"></g>
-      </svg>
+    <p class="subhead">quinze azimuts, un seul trait</p>
+    <div class="trace-layout">
+      <div class="trace-circle">
+        <svg id="svg2" viewBox="0 0 600 600" overflow="visible">
+          <text id="centerEyebrow2" x="300" y="286" text-anchor="middle" class="center-eyebrow">charge totale</text>
+          <text id="centerValue2" x="300" y="312" text-anchor="middle" class="center-value"></text>
+          <text id="centerSub2" x="300" y="334" text-anchor="middle" class="center-sub"></text>
+        </svg>
+      </div>
+      <div class="trace-legend" id="legendList"></div>
     </div>
   </section>
 
@@ -143,9 +185,7 @@
     <p class="subhead">priorité à la charge la plus haute</p>
     <div class="report-row">
       <div class="medallion">
-        <svg viewBox="0 0 640 640" overflow="visible">
-          <path id="ringPath3" class="ring" fill-rule="evenodd"></path>
-        </svg>
+        <svg id="svg3" viewBox="0 0 600 600" overflow="visible"></svg>
       </div>
       <div class="actions" id="actionsList"></div>
     </div>
@@ -159,15 +199,11 @@
     <div class="compare-row">
       <div class="compare-col">
         <div class="compare-label">avant</div>
-        <svg class="compare-circle" viewBox="0 0 640 640" overflow="visible">
-          <path id="ringPathBefore" class="ring faded" fill-rule="evenodd"></path>
-        </svg>
+        <svg id="svgBefore" class="compare-circle" viewBox="0 0 600 600" overflow="visible"></svg>
       </div>
       <div class="compare-col">
         <div class="compare-label">après</div>
-        <svg class="compare-circle" viewBox="0 0 640 640" overflow="visible">
-          <path id="ringPathAfter" class="ring" fill-rule="evenodd"></path>
-        </svg>
+        <svg id="svgAfter" class="compare-circle" viewBox="0 0 600 600" overflow="visible"></svg>
       </div>
     </div>
     <div class="delta-list" id="deltaList"></div>
@@ -186,147 +222,278 @@
 </div>
 
 <script>
-  const cx = 320, cy = 320, outerR = 230, baseInnerR = 190;
-  const MIN_THICK = 14, MAX_THICK = 64;
+  const CX = 300, CY = 300, R = 190;
+  const DOT_MIN = 4, DOT_MAX = 15;
+  const N_AZ = 15;
 
-  const azimutsAvant = [
-    { name: "Calendrier & temps", mid: -45, charge: 0.32, points: 2, seuil: false, note: "2 points ouverts" },
-    { name: "Pilotage de projets", mid: 45,  charge: 0.5,  points: 5, seuil: false, note: "5 chantiers Monday" },
-    { name: "Carrière & opportunités", mid: 135, charge: 0.88, points: 3, seuil: true, note: "3 candidatures en attente" },
-    { name: "Management d'équipe", mid: 225, charge: 0.18, points: 1, seuil: false, note: "1 point, un 1-to-1 à recaler" }
+  const azimutNames = [
+    "Calendrier & temps",
+    "Pilotage de projets",
+    "Carrière & opportunités",
+    "Management d'équipe",
+    "Boîte mail",
+    "Veille sectorielle",
+    "Visibilité & réseaux",
+    "Administratif & budget",
+    "Énergie & charge mentale",
+    "Mémoire & connaissance",
+    "Santé",
+    "Famille & proches",
+    "Loisirs",
+    "Finances perso",
+    "Domicile"
   ];
 
-  const azimutsApres = azimutsAvant.map(a => ({
-    ...a,
-    charge: a.name === "Carrière & opportunités" ? 0.4 : a.name === "Pilotage de projets" ? 0.35 : a.charge,
-    seuil: false
+  const avantRaw = [
+    [0.35, 2, false],
+    [0.72, 7, true],
+    [0.81, 3, true],
+    [0.28, 1, false],
+    [0.55, 14, false],
+    [0.18, 3, false],
+    [0.24, 2, false],
+    [0.40, 2, false],
+    [0.60, 4, false],
+    [0.05, 0, false],
+    [0.15, 1, false],
+    [0.22, 1, false],
+    [0.10, 1, false],
+    [0.30, 2, false],
+    [0.20, 1, false]
+  ];
+
+  function buildAzimuts(charges) {
+    return azimutNames.map((name, i) => {
+      const [charge, points, seuil] = charges[i];
+      return {
+        name,
+        mid: -90 + i * (360 / N_AZ),
+        charge,
+        points,
+        seuil
+      };
+    });
+  }
+
+  const azimutsAvant = buildAzimuts(avantRaw);
+  const azimutsApres = buildAzimuts(avantRaw.map((row, i) => {
+    const name = azimutNames[i];
+    let charge = row[0];
+    if (name === "Pilotage de projets") charge = 0.35;
+    if (name === "Carrière & opportunités") charge = 0.40;
+    return [charge, row[1], false];
   }));
+  const azimutsNeutres = buildAzimuts(avantRaw.map(row => [0, row[1], row[2]]));
 
-  const azimutsNeutres = azimutsAvant.map(a => ({ ...a, charge: 0.08, seuil: false }));
-
-  function norm(a) { let x = a % 360; if (x < 0) x += 360; return x; }
-
-  function chargeAt(azimuts, angleDeg) {
-    const a = norm(angleDeg);
-    for (let i = 0; i < azimuts.length; i++) {
-      const m = norm(azimuts[i].mid);
-      const mNext = norm(azimuts[(i + 1) % azimuts.length].mid);
-      let span = mNext - m; if (span <= 0) span += 360;
-      let rel = a - m; if (rel < 0) rel += 360;
-      if (rel <= span) {
-        const next = azimuts[(i + 1) % azimuts.length];
-        const t = rel / span;
-        const smooth = t * t * (3 - 2 * t);
-        return azimuts[i].charge + (next.charge - azimuts[i].charge) * smooth;
-      }
-    }
-    return azimuts[0].charge;
-  }
-
-  function polar(px, py, angleDeg, radius) {
+  function polar(angleDeg, radius) {
     const a = (angleDeg * Math.PI) / 180;
-    return { x: px + radius * Math.cos(a), y: py + radius * Math.sin(a) };
+    return { x: CX + radius * Math.cos(a), y: CY + radius * Math.sin(a) };
   }
 
-  function buildRingPath(azimuts, ocx, ocy, oOuterR) {
-    const N = 140;
-    let outer = [], inner = [];
-    for (let i = 0; i <= N; i++) {
-      const ang = (360 / N) * i;
-      const c = chargeAt(azimuts, ang);
-      const thickness = MIN_THICK + c * (MAX_THICK - MIN_THICK);
-      outer.push(polar(ocx, ocy, ang, oOuterR));
-      inner.push(polar(ocx, ocy, ang, oOuterR - thickness));
-    }
-    let d = `M ${outer[0].x.toFixed(2)} ${outer[0].y.toFixed(2)} `;
-    outer.slice(1).forEach(p => d += `L ${p.x.toFixed(2)} ${p.y.toFixed(2)} `);
-    d += 'Z ';
-    d += `M ${inner[0].x.toFixed(2)} ${inner[0].y.toFixed(2)} `;
-    inner.slice(1).reverse().forEach(p => d += `L ${p.x.toFixed(2)} ${p.y.toFixed(2)} `);
-    d += 'Z';
-    return d;
+  function dotRadius(charge) {
+    return DOT_MIN + charge * (DOT_MAX - DOT_MIN);
   }
 
-  document.getElementById('ringPath1').setAttribute('d', buildRingPath(azimutsNeutres, cx, cy, outerR));
-  document.getElementById('ringPath2').setAttribute('d', buildRingPath(azimutsAvant, cx, cy, outerR));
-  document.getElementById('ringPath3').setAttribute('d', buildRingPath(azimutsAvant, cx, cy, outerR));
-  document.getElementById('ringPathBefore').setAttribute('d', buildRingPath(azimutsAvant, cx, cy, outerR));
-  document.getElementById('ringPathAfter').setAttribute('d', buildRingPath(azimutsApres, cx, cy, outerR));
-
-  const leaders2 = document.getElementById('leadersGroup2');
-  const labels2 = document.getElementById('labelsGroup2');
-
-  azimutsAvant.forEach((az) => {
-    const onRing = polar(cx, cy, az.mid, outerR);
-    const bend = polar(cx, cy, az.mid, outerR + 34);
-    const lp = polar(cx, cy, az.mid, outerR + 40);
-
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    line.setAttribute('points', `${onRing.x.toFixed(1)},${onRing.y.toFixed(1)} ${bend.x.toFixed(1)},${bend.y.toFixed(1)} ${lp.x.toFixed(1)},${lp.y.toFixed(1)}`);
-    line.setAttribute('class', 'leader');
-    leaders2.appendChild(line);
-
-    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    dot.setAttribute('cx', onRing.x.toFixed(1)); dot.setAttribute('cy', onRing.y.toFixed(1));
-    dot.setAttribute('r', 3); dot.setAttribute('class', 'leader-dot');
-    leaders2.appendChild(dot);
-
-    const cos = Math.cos((az.mid * Math.PI) / 180);
-    const anchor = Math.abs(cos) < 0.35 ? 'middle' : (cos > 0 ? 'start' : 'end');
-    const dx = anchor === 'start' ? 8 : anchor === 'end' ? -8 : 0;
-
-    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    text.setAttribute('x', (lp.x + dx).toFixed(1)); text.setAttribute('y', lp.y.toFixed(1));
-    text.setAttribute('text-anchor', anchor); text.setAttribute('class', 'label');
-    text.textContent = az.name;
-    labels2.appendChild(text);
-
-    const readout = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    readout.setAttribute('x', (lp.x + dx).toFixed(1)); readout.setAttribute('y', (lp.y + 16).toFixed(1));
-    readout.setAttribute('text-anchor', anchor); readout.setAttribute('class', 'readout');
-    readout.textContent = `${az.points} pts`;
-    labels2.appendChild(readout);
-
-    if (az.seuil) {
-      const fx = anchor === 'start' ? lp.x - 14 : anchor === 'end' ? lp.x + 14 : lp.x + 46;
-      const fy = lp.y - 4;
-      const flag = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      flag.setAttribute('d', `M ${fx} ${fy} h 28 l -6 6 l 6 6 h -28 Z`);
-      flag.setAttribute('class', 'caution-flag');
-      labels2.appendChild(flag);
-      const ft = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      ft.setAttribute('x', fx + 3); ft.setAttribute('y', fy + 9);
-      ft.setAttribute('class', 'caution-label'); ft.textContent = 'seuil';
-      labels2.appendChild(ft);
+  function buildHairlinePath() {
+    const pts = [];
+    for (let i = 0; i <= 180; i++) {
+      const deg = 2 * i;
+      const rad = (deg * Math.PI) / 180;
+      const r = R + 1.6 * Math.sin(2 * rad + 0.4) + 1.1 * Math.sin(5 * rad + 2.1);
+      const p = polar(deg, r);
+      pts.push(`${p.x.toFixed(2)},${p.y.toFixed(2)}`);
     }
+    return `M ${pts[0]} L ${pts.slice(1).join(' ')} Z`;
+  }
+
+  const HAIRLINE_D = buildHairlinePath();
+
+  function drawCircle(svg, azimuts, options = {}) {
+    const { interactive = false, preserve = [] } = options;
+    const keep = new Set(preserve);
+    [...svg.querySelectorAll('[data-perimeter]')].forEach(el => el.remove());
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', HAIRLINE_D);
+    path.setAttribute('class', 'ring-path');
+    path.setAttribute('data-perimeter', 'ring');
+    const firstKeep = [...svg.childNodes].find(n => keep.has(n.id));
+    if (firstKeep) svg.insertBefore(path, firstKeep);
+    else svg.appendChild(path);
+
+    const dotsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    dotsGroup.setAttribute('data-perimeter', 'dots');
+    if (firstKeep) svg.insertBefore(dotsGroup, firstKeep);
+    else svg.appendChild(dotsGroup);
+
+    azimuts.forEach((az, i) => {
+      const pos = polar(az.mid, R);
+      const r = dotRadius(az.charge);
+
+      if (interactive) {
+        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        hit.setAttribute('cx', pos.x.toFixed(2));
+        hit.setAttribute('cy', pos.y.toFixed(2));
+        hit.setAttribute('r', 18);
+        hit.setAttribute('class', 'azimut-hit');
+        hit.setAttribute('data-index', i);
+        hit.setAttribute('data-perimeter', 'hit');
+        dotsGroup.appendChild(hit);
+      }
+
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', pos.x.toFixed(2));
+      dot.setAttribute('cy', pos.y.toFixed(2));
+      dot.setAttribute('r', r);
+      dot.setAttribute('class', 'azimut-dot');
+      dot.setAttribute('data-index', i);
+      dot.setAttribute('data-base-r', r);
+      dot.setAttribute('data-perimeter', 'dot');
+      dotsGroup.appendChild(dot);
+    });
+  }
+
+  function meanChargePct(azimuts) {
+    const avg = azimuts.reduce((s, a) => s + a.charge, 0) / azimuts.length;
+    return Math.round(avg * 100);
+  }
+
+  const seuilCount = azimutsAvant.filter(a => a.seuil).length;
+  const actionsAzimuts = [...azimutsAvant]
+    .filter(a => a.points >= 1)
+    .sort((a, b) => b.charge - a.charge);
+  const actionCount = actionsAzimuts.length;
+
+  function footRightFor(step) {
+    if (step === 1) return 'en attente de lancement';
+    if (step === 2) {
+      if (seuilCount === 1) return '1 azimut dépasse son seuil';
+      return `${seuilCount} azimuts dépassent leur seuil`;
+    }
+    if (step === 3) return `plan en ${actionCount} actions`;
+    return 'charge globale en baisse';
+  }
+
+  // --- Sequence 1 ---
+  drawCircle(document.getElementById('svg1'), azimutsNeutres, {
+    preserve: []
+  });
+  // Re-draw so center texts stay on top: move texts after ring
+  (function ensureCenterOnTop(svg) {
+    const texts = [...svg.querySelectorAll('text')];
+    texts.forEach(t => svg.appendChild(t));
+  })(document.getElementById('svg1'));
+
+  // --- Sequence 2 ---
+  const svg2 = document.getElementById('svg2');
+  drawCircle(svg2, azimutsAvant, { interactive: true });
+  ['centerEyebrow2', 'centerValue2', 'centerSub2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) svg2.appendChild(el);
   });
 
+  const centerEyebrow2 = document.getElementById('centerEyebrow2');
+  const centerValue2 = document.getElementById('centerValue2');
+  const centerSub2 = document.getElementById('centerSub2');
+  const totalCharge = meanChargePct(azimutsAvant);
+
+  function setCenterRest() {
+    centerEyebrow2.textContent = 'charge totale';
+    centerValue2.textContent = String(totalCharge);
+    centerValue2.setAttribute('style', '');
+    centerSub2.textContent = '';
+  }
+
+  function setCenterHover(az) {
+    centerEyebrow2.textContent = az.name;
+    centerValue2.textContent = `${Math.round(az.charge * 100)}%`;
+    centerValue2.setAttribute('style', 'font-size:18px');
+    const pts = `${az.points} pts`;
+    centerSub2.textContent = az.seuil ? `${pts} · seuil` : pts;
+  }
+
+  setCenterRest();
+
+  const legendList = document.getElementById('legendList');
+  const head = document.createElement('div');
+  head.className = 'legend-head';
+  head.innerHTML = '<span class="eyebrow">Perimeter — 15 azimuts</span>';
+  legendList.appendChild(head);
+
+  const legendSorted = azimutsAvant
+    .map((az, originIndex) => ({ az, originIndex }))
+    .sort((a, b) => b.az.charge - a.az.charge || a.originIndex - b.originIndex);
+
+  legendSorted.forEach(({ az, originIndex }, rank) => {
+    const row = document.createElement('div');
+    row.className = 'legend-row';
+    row.dataset.index = originIndex;
+    row.innerHTML = `
+      <span class="legend-num">${String(rank + 1).padStart(2, '0')}</span>
+      <span class="legend-name">${az.name}</span>
+      <span class="legend-pts">${az.points} pts</span>
+      ${az.seuil ? '<span class="legend-seuil">seuil</span>' : ''}`;
+    legendList.appendChild(row);
+  });
+
+  function setHighlight(index) {
+    svg2.querySelectorAll('.azimut-dot').forEach(dot => {
+      const i = Number(dot.dataset.index);
+      const base = Number(dot.dataset.baseR);
+      dot.setAttribute('r', index === i ? base + 3 : base);
+    });
+    legendList.querySelectorAll('.legend-row').forEach(row => {
+      row.classList.toggle('is-active', index !== null && Number(row.dataset.index) === index);
+    });
+    if (index === null) setCenterRest();
+    else setCenterHover(azimutsAvant[index]);
+  }
+
+  svg2.querySelectorAll('.azimut-hit').forEach(hit => {
+    hit.addEventListener('mouseenter', () => setHighlight(Number(hit.dataset.index)));
+    hit.addEventListener('mouseleave', () => setHighlight(null));
+  });
+  legendList.querySelectorAll('.legend-row').forEach(row => {
+    row.addEventListener('mouseenter', () => setHighlight(Number(row.dataset.index)));
+    row.addEventListener('mouseleave', () => setHighlight(null));
+  });
+
+  // --- Sequence 3 ---
+  drawCircle(document.getElementById('svg3'), azimutsAvant);
+
   const actionsList = document.getElementById('actionsList');
-  [...azimutsAvant].sort((a, b) => b.charge - a.charge).forEach((az, i) => {
-    const row = document.createElement('div'); row.className = 'action-item';
-    row.innerHTML = `<span class="action-rank">${(i + 1).toString().padStart(2, '0')}</span>
-      <span class="action-name">${az.name}<span class="action-note"> — ${az.note}</span></span>
+  actionsAzimuts.forEach((az, i) => {
+    const row = document.createElement('div');
+    row.className = 'action-item';
+    row.innerHTML = `<span class="action-rank">${String(i + 1).padStart(2, '0')}</span>
+      <span class="action-name">${az.name}<span class="action-note"> — ${az.points} pts</span></span>
       ${az.seuil ? '<span class="action-flag">seuil</span>' : ''}`;
     actionsList.appendChild(row);
   });
+
+  // --- Sequence 4 ---
+  drawCircle(document.getElementById('svgBefore'), azimutsAvant);
+  drawCircle(document.getElementById('svgAfter'), azimutsApres);
 
   const deltaList = document.getElementById('deltaList');
   azimutsAvant.forEach((a, i) => {
     const b = azimutsApres[i];
     const diff = b.charge - a.charge;
-    const row = document.createElement('div'); row.className = 'delta-item';
+    const row = document.createElement('div');
+    row.className = 'delta-item';
     row.innerHTML = `<span class="delta-name">${a.name}</span>
-      <span class="delta-value ${diff < 0 ? 'down' : ''}">${diff <= 0 ? '' : '+'}${(diff * 100).toFixed(0)}%</span>`;
+      <span class="delta-value ${diff < 0 ? 'down' : ''}">${diff <= 0 ? '' : '+'}${Math.round(diff * 100)}%</span>`;
     deltaList.appendChild(row);
   });
 
+  // --- Stepper ---
   let currentStep = 1;
+  const page = document.getElementById('page');
   const stepEls = document.querySelectorAll('.step');
   const dots = document.querySelectorAll('#stepper .dot');
   const stepLabel = document.getElementById('stepLabel');
   const footLeft = document.getElementById('footLeft');
   const footRight = document.getElementById('footRight');
-  const footRightText = ['en attente de lancement', '1 azimut dépasse son seuil', 'plan en 4 actions', 'charge globale en baisse'];
 
   function render() {
     stepEls.forEach(s => s.classList.toggle('active', Number(s.dataset.step) === currentStep));
@@ -337,13 +504,12 @@
     });
     stepLabel.textContent = `étape ${currentStep} / 4`;
     footLeft.textContent = `tracé — étape ${currentStep} / 4`;
-    footRight.textContent = footRightText[currentStep - 1];
+    footRight.textContent = footRightFor(currentStep);
     document.getElementById('prevBtn').disabled = currentStep === 1;
     document.getElementById('nextBtn').disabled = currentStep === 4;
+    page.classList.toggle('wide', currentStep === 2);
 
-    let sum = 0;
     if (currentStep >= 3) {
-      sum = azimutsAvant.reduce((s, a) => s + a.charge, 0) / azimutsAvant.length * 100;
       document.getElementById('progressFill').style.width = '0%';
     }
   }
