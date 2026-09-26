@@ -68,8 +68,9 @@
   .legend-row.is-active { background: var(--perimeter-paper); }
   .legend-num { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--perimeter-slate); width: 22px; flex-shrink: 0; }
   .legend-name { font-size: 14px; font-weight: 700; color: var(--perimeter-obsidian); flex: 1; min-width: 0; }
-  .legend-pts { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--perimeter-slate); flex-shrink: 0; }
-  .legend-seuil { font-size: 10px; color: var(--rubric); letter-spacing: 0.04em; flex-shrink: 0; }
+  .legend-pct { font-size: 12px; font-weight: 600; color: var(--perimeter-obsidian); font-variant-numeric: tabular-nums; width: 44px; text-align: right; flex-shrink: 0; }
+  .legend-pts { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--perimeter-slate); width: 48px; text-align: right; flex-shrink: 0; }
+  .legend-seuil { font-size: 10px; color: var(--rubric); letter-spacing: 0.04em; width: 36px; text-align: right; flex-shrink: 0; }
 
   .go-btn {
     display: block; margin: 36px auto 0; font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums;
@@ -358,6 +359,10 @@
     return Math.round(avg * 100);
   }
 
+  function formatPct(charge) {
+    return Math.round(charge * 100) + '\u202F%';
+  }
+
   const seuilCount = azimutsAvant.filter(a => a.seuil).length;
   const actionsAzimuts = [...azimutsAvant]
     .filter(a => a.points >= 1)
@@ -406,7 +411,7 @@
 
   function setCenterHover(az) {
     centerEyebrow2.textContent = az.name;
-    centerValue2.textContent = `${Math.round(az.charge * 100)}%`;
+    centerValue2.textContent = formatPct(az.charge);
     centerValue2.setAttribute('style', 'font-size:18px');
     const pts = `${az.points} pts`;
     centerSub2.textContent = az.seuil ? `${pts} · seuil` : pts;
@@ -431,8 +436,9 @@
     row.innerHTML = `
       <span class="legend-num">${String(rank + 1).padStart(2, '0')}</span>
       <span class="legend-name">${az.name}</span>
+      <span class="legend-pct">${formatPct(az.charge)}</span>
       <span class="legend-pts">${az.points} pts</span>
-      ${az.seuil ? '<span class="legend-seuil">seuil</span>' : ''}`;
+      <span class="legend-seuil">${az.seuil ? 'seuil' : ''}</span>`;
     legendList.appendChild(row);
   });
 
